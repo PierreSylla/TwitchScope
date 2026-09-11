@@ -48,5 +48,63 @@
   "authErrorGeneric": {
     "message": "Une erreur est survenue. Veuillez réessayer.",
     "description": "Generic error shown when the login flow fails."
+  },
+  "tabFollowed": {
+    "message": "Suivis",
+    "description": "Tab label for the followed channels screen."
+  },
+  "tabPopular": {
+    "message": "Populaire",
+    "description": "Tab label for the popular streams screen (not built yet)."
+  },
+  "tabBrowse": {
+    "message": "Parcourir",
+    "description": "Tab label for the browse-by-game screen (not built yet)."
+  },
+  "tabSearch": {
+    "message": "Rechercher",
+    "description": "Tab label for the search screen (not built yet)."
+  },
+  "refreshButton": {
+    "message": "Rafraîchir",
+    "description": "Accessible label for the manual refresh icon button."
+  },
+  "settingsButton": {
+    "message": "Réglages",
+    "description": "Accessible label for the settings icon button that opens the options page."
+  },
+  "liveBadge": {
+    "message": "LIVE",
+    "description": "Badge shown on a stream thumbnail that is currently live."
+  },
+  "streamViewers": {
+    "message": "$COUNT$ spectateurs",
+    "description": "Viewer count shown on a stream card.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1 234"
+      }
+    }
+  },
+  "followedEmpty": {
+    "message": "Aucune de vos chaînes suivies n'est en live.",
+    "description": "Shown on the Followed screen when nobody is live."
+  },
+  "followedEmptyCta": {
+    "message": "Voir les tendances dans Populaire",
+    "description": "Suggestion shown below the empty-followed-list message."
+  },
+  "followedDisconnectedTitle": {
+    "message": "Suivez vos chaînes Twitch en live",
+    "description": "Heading shown on the Followed screen when logged out."
+  },
+  "followedDisconnectedBody": {
+    "message": "Connectez votre compte pour voir qui est en direct.",
+    "description": "Body text shown on the Followed screen when logged out."
+  },
+  "followedError": {
+    "message": "Impossible de charger vos chaînes suivies.",
+    "description": "Shown on the Followed screen when the streams request fails."
   }
 }

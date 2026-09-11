@@ -1,0 +1,19 @@
+@theme {
+  --color-brand: #7c5cfc;
+  --color-ink: #18181b;
+  --color-ink-muted: #6b7280;
+  --color-panel: #ffffff;
+  --color-tile: #f4f4f6;
+  --color-hairline: #e4e4e7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-brand: #a78bfa;
+    --color-ink: #f4f4f5;
+    --color-ink-muted: #a1a1aa;
+    --color-panel: #0e0e10;
+    --color-tile: #1c1c21;
+    --color-hairline: #2c2c33;
+  }
+}

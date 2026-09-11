@@ -16,6 +16,11 @@ interface ValidateResult {
   expiresIn: number;
 }
 
+// Logs the failure reason only (never the token) — otherwise auth failures are silent.
+function warnAuthError(step: string, code: string): void {
+  console.warn(`[auth] ${step} failed: ${code}`);
+}
+
 export function buildAuthorizeUrl(redirectUri: string, state: string): string {
   const url = new URL(OAUTH_AUTHORIZE_URL);
   url.searchParams.set('client_id', TWITCH_CLIENT_ID);
@@ -85,21 +90,28 @@ export async function login(): Promise<AuthResponse> {
       interactive: true,
     });
   } catch {
+    warnAuthError('launchWebAuthFlow', 'auth_cancelled');
     return { ok: false, error: 'auth_cancelled' };
   }
-  if (!redirectUrl) return { ok: false, error: 'auth_cancelled' };
+  if (!redirectUrl) {
+    warnAuthError('launchWebAuthFlow', 'auth_cancelled');
+    return { ok: false, error: 'auth_cancelled' };
+  }
 
   let accessToken: string;
   try {
     accessToken = parseAuthRedirect(redirectUrl, state);
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'auth_failed' };
+    const code = err instanceof Error ? err.message : 'auth_failed';
+    warnAuthError('parseAuthRedirect', code);
+    return { ok: false, error: code };
   }
 
   let validated: ValidateResult;
   try {
     validated = await validateToken(accessToken);
   } catch {
+    warnAuthError('validateToken', 'validation_failed');
     return { ok: false, error: 'validation_failed' };
   }
 
@@ -127,6 +139,7 @@ export async function revalidateSession(): Promise<void> {
   try {
     await validateToken(session.accessToken);
   } catch {
+    warnAuthError('revalidateSession', 'validation_failed');
     await clearSession();
   }
 }

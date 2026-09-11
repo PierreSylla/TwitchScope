@@ -48,5 +48,63 @@
   "authErrorGeneric": {
     "message": "Something went wrong. Please try again.",
     "description": "Generic error shown when the login flow fails."
+  },
+  "tabFollowed": {
+    "message": "Followed",
+    "description": "Tab label for the followed channels screen."
+  },
+  "tabPopular": {
+    "message": "Popular",
+    "description": "Tab label for the popular streams screen (not built yet)."
+  },
+  "tabBrowse": {
+    "message": "Browse",
+    "description": "Tab label for the browse-by-game screen (not built yet)."
+  },
+  "tabSearch": {
+    "message": "Search",
+    "description": "Tab label for the search screen (not built yet)."
+  },
+  "refreshButton": {
+    "message": "Refresh",
+    "description": "Accessible label for the manual refresh icon button."
+  },
+  "settingsButton": {
+    "message": "Settings",
+    "description": "Accessible label for the settings icon button that opens the options page."
+  },
+  "liveBadge": {
+    "message": "LIVE",
+    "description": "Badge shown on a stream thumbnail that is currently live."
+  },
+  "streamViewers": {
+    "message": "$COUNT$ viewers",
+    "description": "Viewer count shown on a stream card.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,234"
+      }
+    }
+  },
+  "followedEmpty": {
+    "message": "None of your followed channels are live.",
+    "description": "Shown on the Followed screen when nobody is live."
+  },
+  "followedEmptyCta": {
+    "message": "See what's trending in Popular",
+    "description": "Suggestion shown below the empty-followed-list message."
+  },
+  "followedDisconnectedTitle": {
+    "message": "Track your live Twitch channels",
+    "description": "Heading shown on the Followed screen when logged out."
+  },
+  "followedDisconnectedBody": {
+    "message": "Connect your account to see who's live.",
+    "description": "Body text shown on the Followed screen when logged out."
+  },
+  "followedError": {
+    "message": "Couldn't load your followed channels.",
+    "description": "Shown on the Followed screen when the streams request fails."
   }
 }

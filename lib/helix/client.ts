@@ -49,6 +49,8 @@ export function createHelixClient(clientOptions: HelixClientOptions) {
   return { request };
 }
 
+export type HelixClient = ReturnType<typeof createHelixClient>;
+
 async function fetchWithRateLimitBackoff(
   url: URL,
   init: RequestInit,

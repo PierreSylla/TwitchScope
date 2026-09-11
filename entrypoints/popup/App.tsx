@@ -1,102 +1,166 @@
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
+import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
+import type { StreamsMessage, StreamsResponse } from '@/lib/streams/types';
+import type { FollowedStreamView } from '@/lib/streams/types';
+import PopupHeader from './PopupHeader';
+import StreamCard from './StreamCard';
 
 type ViewState =
-  | { kind: 'loading' }
-  | { kind: 'connected'; login: string }
+  | { kind: 'authLoading' }
   | { kind: 'disconnected' }
-  | { kind: 'error'; code: string };
+  | { kind: 'streamsLoading' }
+  | { kind: 'streamsError' }
+  | { kind: 'streamsEmpty' }
+  | { kind: 'streamsLoaded'; streams: FollowedStreamView[] };
 
-async function sendAuthMessage(message: AuthMessage): Promise<AuthResponse> {
-  return browser.runtime.sendMessage(message);
+function announce(state: ViewState): string {
+  switch (state.kind) {
+    case 'authLoading':
+    case 'streamsLoading':
+      return browser.i18n.getMessage('authLoading');
+    case 'disconnected':
+      return browser.i18n.getMessage('followedDisconnectedTitle');
+    case 'streamsError':
+      return browser.i18n.getMessage('followedError');
+    case 'streamsEmpty':
+      return browser.i18n.getMessage('followedEmpty');
+    case 'streamsLoaded':
+      return browser.i18n.getMessage('streamViewers', [String(state.streams.length)]);
+  }
 }
 
-function toViewState(response: AuthResponse): ViewState {
-  if (!response.ok) return { kind: 'error', code: response.error };
-  return response.status.connected
-    ? { kind: 'connected', login: response.status.login }
-    : { kind: 'disconnected' };
-}
-
-function errorMessage(code: string): string {
-  return browser.i18n.getMessage(
-    code === 'auth_cancelled' ? 'authErrorCancelled' : 'authErrorGeneric',
-  );
+async function loadStreams(): Promise<ViewState> {
+  const res = await sendMessage<StreamsResponse>({
+    type: 'streams/getFollowed',
+  } satisfies StreamsMessage);
+  if (!res.ok)
+    return res.error === 'not_connected' ? { kind: 'disconnected' } : { kind: 'streamsError' };
+  return res.streams.length === 0
+    ? { kind: 'streamsEmpty' }
+    : { kind: 'streamsLoaded', streams: res.streams };
 }
 
 function App() {
-  const [state, setState] = useState<ViewState>({ kind: 'loading' });
-  const [pending, setPending] = useState(false);
+  const [state, setState] = useState<ViewState>({ kind: 'authLoading' });
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
-    sendAuthMessage({ type: 'auth/getStatus' })
-      .then((res) => setState(toViewState(res)))
-      .catch(() => setState({ kind: 'error', code: 'auth_failed' }));
+    (async () => {
+      const authRes = await sendMessage<AuthResponse>({
+        type: 'auth/getStatus',
+      } satisfies AuthMessage);
+      if (!authRes.ok || !authRes.status.connected) {
+        setState({ kind: 'disconnected' });
+        return;
+      }
+      setState({ kind: 'streamsLoading' });
+      setState(await loadStreams());
+    })();
   }, []);
 
-  async function runAuthAction(message: AuthMessage) {
-    setPending(true);
-    try {
-      const res = await sendAuthMessage(message);
-      setState(toViewState(res));
-    } catch {
-      setState({ kind: 'error', code: 'auth_failed' });
-    } finally {
-      setPending(false);
-    }
+  async function handleConnect() {
+    setConnecting(true);
+    const res = await sendMessage<AuthResponse>({ type: 'auth/login' } satisfies AuthMessage);
+    setConnecting(false);
+    if (!res.ok || !res.status.connected) return;
+    setState({ kind: 'streamsLoading' });
+    setState(await loadStreams());
   }
 
-  return (
-    <div
-      aria-live="polite"
-      className="flex w-80 flex-col items-center justify-center gap-3 p-6 text-sm"
-    >
-      {state.kind === 'loading' && (
-        <p className="text-neutral-500 dark:text-neutral-400">
-          {browser.i18n.getMessage('authLoading')}
-        </p>
-      )}
+  async function handleRefresh() {
+    setState({ kind: 'streamsLoading' });
+    setState(await loadStreams());
+  }
 
-      {state.kind === 'connected' && (
-        <>
-          <p className="text-neutral-700 dark:text-neutral-300">
-            {browser.i18n.getMessage('authConnectedAs', [state.login])}
-          </p>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => runAuthAction({ type: 'auth/logout' })}
-            className="rounded bg-neutral-200 px-4 py-2 font-medium disabled:opacity-50 dark:bg-neutral-800"
-          >
-            {browser.i18n.getMessage(pending ? 'authDisconnectingButton' : 'authDisconnectButton')}
-          </button>
-        </>
+  const showChrome = state.kind !== 'authLoading' && state.kind !== 'disconnected';
+
+  return (
+    <div className="w-[380px] overflow-hidden rounded-2xl border border-hairline bg-panel text-sm shadow-[0_1px_3px_rgba(0,0,0,.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,.3)]">
+      <PopupHeader showChrome={showChrome} onRefresh={handleRefresh} />
+      <p className="sr-only" aria-live="polite">
+        {announce(state)}
+      </p>
+
+      {(state.kind === 'authLoading' || state.kind === 'streamsLoading') && (
+        <div className="flex min-h-[460px] flex-col gap-3 p-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="overflow-hidden rounded-xl border border-hairline bg-tile">
+              <div className="aspect-video bg-hairline" />
+              <div className="flex flex-col gap-2 p-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-hairline" />
+                  <div className="flex flex-1 flex-col gap-1">
+                    <div className="h-2 w-3/5 rounded bg-hairline" />
+                    <div className="h-1.5 w-2/5 rounded bg-hairline" />
+                  </div>
+                </div>
+                <div className="h-1.5 w-4/5 rounded bg-hairline" />
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {state.kind === 'disconnected' && (
-        <button
-          type="button"
-          disabled={pending}
-          onClick={() => runAuthAction({ type: 'auth/login' })}
-          className="rounded bg-purple-600 px-4 py-2 font-medium text-white disabled:opacity-50"
-        >
-          {browser.i18n.getMessage(pending ? 'authConnectingButton' : 'authConnectButton')}
-        </button>
-      )}
-
-      {state.kind === 'error' && (
-        <>
-          <p className="text-red-600 dark:text-red-400">{errorMessage(state.code)}</p>
+        <div className="flex min-h-[504px] flex-col items-center justify-center gap-3.5 p-8 text-center">
+          <span className="relative block h-12 w-12 rounded-full border-2 border-brand">
+            <span className="absolute -bottom-px -right-px block h-3.5 w-3.5 rounded-full bg-brand" />
+          </span>
+          <p className="text-sm font-semibold text-ink">
+            {browser.i18n.getMessage('followedDisconnectedTitle')}
+          </p>
+          <p className="max-w-[260px] text-[13px] leading-relaxed text-ink-muted">
+            {browser.i18n.getMessage('followedDisconnectedBody')}
+          </p>
           <button
             type="button"
-            disabled={pending}
-            onClick={() => runAuthAction({ type: 'auth/login' })}
-            className="rounded bg-purple-600 px-4 py-2 font-medium text-white disabled:opacity-50"
+            disabled={connecting}
+            onClick={handleConnect}
+            className="rounded-lg bg-brand px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50"
+          >
+            {browser.i18n.getMessage(connecting ? 'authConnectingButton' : 'authConnectButton')}
+          </button>
+        </div>
+      )}
+
+      {state.kind === 'streamsError' && (
+        <div className="flex min-h-[504px] flex-col items-center justify-center gap-3.5 p-8 text-center">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-red-500 text-lg font-bold text-red-500">
+            !
+          </div>
+          <p className="max-w-[260px] text-[13px] leading-relaxed text-ink-muted">
+            {browser.i18n.getMessage('followedError')}
+          </p>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="rounded-lg border border-hairline px-[18px] py-[9px] text-[13px] font-semibold text-ink"
           >
             {browser.i18n.getMessage('authRetryButton')}
           </button>
-        </>
+        </div>
+      )}
+
+      {state.kind === 'streamsEmpty' && (
+        <div className="flex min-h-[460px] flex-col items-center justify-center gap-3 p-8 text-center">
+          <span className="block h-11 w-11 rounded-full border-2 border-hairline" />
+          <p className="max-w-[260px] text-[13px] leading-relaxed text-ink-muted">
+            {browser.i18n.getMessage('followedEmpty')}
+          </p>
+          <span className="text-[13px] font-semibold text-brand">
+            {browser.i18n.getMessage('followedEmptyCta')}
+          </span>
+        </div>
+      )}
+
+      {state.kind === 'streamsLoaded' && (
+        <div className="flex min-h-[460px] flex-col gap-3 p-3">
+          {state.streams.map((stream) => (
+            <StreamCard key={stream.id} stream={stream} />
+          ))}
+        </div>
       )}
     </div>
   );

@@ -1,11 +1,41 @@
 import { browser } from 'wxt/browser';
 import { TOKEN_VALIDATION_INTERVAL_MINUTES } from '@/lib/config';
 import { getStatus, login, logout, revalidateSession } from '@/lib/auth/oauth';
+import { clearSession, getSession } from '@/lib/auth/storage';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
+import { createHelixClient, type HelixClient } from '@/lib/helix/client';
+import { HelixAuthError } from '@/lib/helix/types';
+import { getFollowedStreams } from '@/lib/helix/streams';
+import { getUsersByIds } from '@/lib/helix/users';
+import { toFollowedStreamViews } from '@/lib/streams/mapper';
+import type { StreamsMessage, StreamsResponse } from '@/lib/streams/types';
 
 const TOKEN_VALIDATION_ALARM = 'auth-token-validate';
 
-async function handleMessage(message: AuthMessage): Promise<AuthResponse> {
+const helixClient: HelixClient = createHelixClient({
+  getAccessToken: async () => (await getSession())?.accessToken ?? null,
+  onUnauthorized: () => clearSession(),
+});
+
+async function getFollowedStreamsForCurrentUser(): Promise<StreamsResponse> {
+  const session = await getSession();
+  if (!session) return { ok: false, error: 'not_connected' };
+
+  try {
+    const streams = await getFollowedStreams(helixClient, session.userId);
+    const users = await getUsersByIds(helixClient, [...new Set(streams.map((s) => s.user_id))]);
+    const usersById = new Map(users.map((u) => [u.id, u]));
+    return { ok: true, streams: toFollowedStreamViews(streams, usersById) };
+  } catch (err) {
+    if (err instanceof HelixAuthError) return { ok: false, error: 'not_connected' };
+    return { ok: false, error: 'fetch_failed' };
+  }
+}
+
+type AppMessage = AuthMessage | StreamsMessage;
+type AppResponse = AuthResponse | StreamsResponse;
+
+async function handleMessage(message: AppMessage): Promise<AppResponse> {
   switch (message.type) {
     case 'auth/getStatus':
       return { ok: true, status: await getStatus() };
@@ -13,6 +43,8 @@ async function handleMessage(message: AuthMessage): Promise<AuthResponse> {
       return login();
     case 'auth/logout':
       return logout();
+    case 'streams/getFollowed':
+      return getFollowedStreamsForCurrentUser();
   }
 }
 
@@ -33,6 +65,6 @@ export default defineBackground({
       if (alarm.name === TOKEN_VALIDATION_ALARM) void revalidateSession();
     });
 
-    browser.runtime.onMessage.addListener((message: AuthMessage) => handleMessage(message));
+    browser.runtime.onMessage.addListener((message: AppMessage) => handleMessage(message));
   },
 });
