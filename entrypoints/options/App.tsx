@@ -2,6 +2,48 @@ import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
+import { getDensity, setDensity } from '@/lib/settings/storage';
+import { DEFAULT_DENSITY, type Density } from '@/lib/settings/types';
+
+const DENSITY_OPTIONS = ['compact', 'comfortable'] as const;
+
+function DensitySection() {
+  const [density, setDensityState] = useState<Density>(DEFAULT_DENSITY);
+
+  useEffect(() => {
+    getDensity().then(setDensityState);
+  }, []);
+
+  async function handleSelect(next: Density) {
+    setDensityState(next);
+    await setDensity(next);
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+        {browser.i18n.getMessage('settingsDensityLabel')}
+      </h2>
+      <div className="inline-flex w-fit gap-0.5 rounded-lg border border-hairline bg-tile p-0.5">
+        {DENSITY_OPTIONS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            aria-pressed={density === option}
+            onClick={() => handleSelect(option)}
+            className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${
+              density === option ? 'bg-brand text-white dark:text-[#18181B]' : 'text-ink-muted'
+            }`}
+          >
+            {browser.i18n.getMessage(
+              option === 'compact' ? 'settingsDensityCompact' : 'settingsDensityComfortable',
+            )}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 type AccountState =
   { kind: 'loading' } | { kind: 'connected'; login: string } | { kind: 'disconnected' };
@@ -117,6 +159,7 @@ function App() {
       </div>
       <div className="flex flex-col gap-8 p-8">
         <AccountSection />
+        <DensitySection />
       </div>
     </div>
   );

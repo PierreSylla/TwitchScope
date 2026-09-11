@@ -4,6 +4,8 @@ import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
 import type { StreamsMessage, StreamsResponse } from '@/lib/streams/types';
 import type { FollowedStreamView } from '@/lib/streams/types';
+import { getDensity } from '@/lib/settings/storage';
+import { DEFAULT_DENSITY, type Density } from '@/lib/settings/types';
 import PopupHeader from './PopupHeader';
 import StreamCard from './StreamCard';
 
@@ -45,8 +47,11 @@ async function loadStreams(): Promise<ViewState> {
 function App() {
   const [state, setState] = useState<ViewState>({ kind: 'authLoading' });
   const [connecting, setConnecting] = useState(false);
+  const [density, setDensity] = useState<Density>(DEFAULT_DENSITY);
+  const compact = density === 'compact';
 
   useEffect(() => {
+    getDensity().then(setDensity);
     (async () => {
       const authRes = await sendMessage<AuthResponse>({
         type: 'auth/getStatus',
@@ -75,16 +80,17 @@ function App() {
   }
 
   const showChrome = state.kind !== 'authLoading' && state.kind !== 'disconnected';
+  const listPadding = compact ? 'gap-2 p-2' : 'gap-3 p-3';
 
   return (
     <div className="w-[380px] overflow-hidden rounded-2xl border border-hairline bg-panel text-sm shadow-[0_1px_3px_rgba(0,0,0,.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,.3)]">
-      <PopupHeader showChrome={showChrome} onRefresh={handleRefresh} />
+      <PopupHeader showChrome={showChrome} density={density} onRefresh={handleRefresh} />
       <p className="sr-only" aria-live="polite">
         {announce(state)}
       </p>
 
       {(state.kind === 'authLoading' || state.kind === 'streamsLoading') && (
-        <div className="flex min-h-[460px] flex-col gap-3 p-3">
+        <div className={`flex min-h-[460px] flex-col ${listPadding}`}>
           {[0, 1, 2].map((i) => (
             <div key={i} className="overflow-hidden rounded-xl border border-hairline bg-tile">
               <div className="aspect-video bg-hairline" />
@@ -156,9 +162,9 @@ function App() {
       )}
 
       {state.kind === 'streamsLoaded' && (
-        <div className="flex min-h-[460px] flex-col gap-3 p-3">
+        <div className={`flex min-h-[460px] flex-col ${listPadding}`}>
           {state.streams.map((stream) => (
-            <StreamCard key={stream.id} stream={stream} />
+            <StreamCard key={stream.id} stream={stream} density={density} />
           ))}
         </div>
       )}

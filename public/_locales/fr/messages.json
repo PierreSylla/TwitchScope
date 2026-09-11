@@ -122,5 +122,17 @@
   "settingsConnectPrompt": {
     "message": "Connectez votre compte Twitch pour utiliser TwitchScope.",
     "description": "Shown in the account section when logged out."
+  },
+  "settingsDensityLabel": {
+    "message": "Densité d'affichage",
+    "description": "Section label on the options page for the compact/comfortable toggle."
+  },
+  "settingsDensityCompact": {
+    "message": "Compact",
+    "description": "Option label for compact display density."
+  },
+  "settingsDensityComfortable": {
+    "message": "Confortable",
+    "description": "Option label for comfortable display density."
   }
 }
