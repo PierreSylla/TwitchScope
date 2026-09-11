@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "TwitchScope",
+    "description": "Extension name shown in the browser toolbar and store listing."
+  },
+  "extDescription": {
+    "message": "Track your followed Twitch channels going live.",
+    "description": "Short extension description shown in the store listing."
+  }
+}
