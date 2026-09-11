@@ -27,16 +27,6 @@
     "message": "Déconnexion…",
     "description": "Disconnect button label while logging out."
   },
-  "authConnectedAs": {
-    "message": "Connecté en tant que $LOGIN$",
-    "description": "Shown when connected, with the Twitch login name.",
-    "placeholders": {
-      "login": {
-        "content": "$1",
-        "example": "twitchuser"
-      }
-    }
-  },
   "authRetryButton": {
     "message": "Réessayer",
     "description": "Button to retry the login flow after an error."
@@ -106,5 +96,31 @@
   "followedError": {
     "message": "Impossible de charger vos chaînes suivies.",
     "description": "Shown on the Followed screen when the streams request fails."
+  },
+  "followedLoadedAnnouncement": {
+    "message": "$COUNT$ chaînes en direct",
+    "description": "Screen-reader announcement when the followed streams list finishes loading.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "settingsPageTitle": {
+    "message": "Réglages",
+    "description": "Heading of the options page."
+  },
+  "settingsAccountLabel": {
+    "message": "Compte",
+    "description": "Section label on the options page for the connected Twitch account."
+  },
+  "settingsConnectedWith": {
+    "message": "Connecté avec Twitch",
+    "description": "Status subtitle shown under the account name when connected."
+  },
+  "settingsConnectPrompt": {
+    "message": "Connectez votre compte Twitch pour utiliser TwitchScope.",
+    "description": "Shown in the account section when logged out."
   }
 }

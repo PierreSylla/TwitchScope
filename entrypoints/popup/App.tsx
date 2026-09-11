@@ -27,7 +27,7 @@ function announce(state: ViewState): string {
     case 'streamsEmpty':
       return browser.i18n.getMessage('followedEmpty');
     case 'streamsLoaded':
-      return browser.i18n.getMessage('streamViewers', [String(state.streams.length)]);
+      return browser.i18n.getMessage('followedLoadedAnnouncement', [String(state.streams.length)]);
   }
 }
 
