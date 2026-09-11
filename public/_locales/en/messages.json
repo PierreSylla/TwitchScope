@@ -6,5 +6,47 @@
   "extDescription": {
     "message": "Track your followed Twitch channels going live.",
     "description": "Short extension description shown in the store listing."
+  },
+  "authLoading": {
+    "message": "Loading…",
+    "description": "Shown while checking the current connection status."
+  },
+  "authConnectButton": {
+    "message": "Connect with Twitch",
+    "description": "Button to start the OAuth login flow."
+  },
+  "authConnectingButton": {
+    "message": "Connecting…",
+    "description": "Connect button label while the OAuth flow is in progress."
+  },
+  "authDisconnectButton": {
+    "message": "Disconnect",
+    "description": "Button to log out."
+  },
+  "authDisconnectingButton": {
+    "message": "Disconnecting…",
+    "description": "Disconnect button label while logging out."
+  },
+  "authConnectedAs": {
+    "message": "Connected as $LOGIN$",
+    "description": "Shown when connected, with the Twitch login name.",
+    "placeholders": {
+      "login": {
+        "content": "$1",
+        "example": "twitchuser"
+      }
+    }
+  },
+  "authRetryButton": {
+    "message": "Retry",
+    "description": "Button to retry the login flow after an error."
+  },
+  "authErrorCancelled": {
+    "message": "Connection cancelled.",
+    "description": "Shown when the user closes or denies the Twitch login popup."
+  },
+  "authErrorGeneric": {
+    "message": "Something went wrong. Please try again.",
+    "description": "Generic error shown when the login flow fails."
   }
 }
