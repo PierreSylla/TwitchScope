@@ -11,7 +11,9 @@ export interface StreamView {
 }
 
 export type StreamsMessage =
-  { type: 'streams/getFollowed' } | { type: 'streams/getTop'; cursor?: string };
+  | { type: 'streams/getFollowed' }
+  | { type: 'streams/getTop'; cursor?: string }
+  | { type: 'streams/getByGame'; gameId: string; cursor?: string };
 
 export type StreamsResponse =
   { ok: true; streams: StreamView[]; cursor?: string } | { ok: false; error: string };

@@ -49,7 +49,7 @@
   },
   "tabBrowse": {
     "message": "Browse",
-    "description": "Tab label for the browse-by-game screen (not built yet)."
+    "description": "Tab label for the browse-by-game screen."
   },
   "tabSearch": {
     "message": "Search",
@@ -208,5 +208,45 @@
   "settingsThemeDark": {
     "message": "Dark",
     "description": "Theme option forcing the dark palette."
+  },
+  "browseError": {
+    "message": "Couldn’t load games.",
+    "description": "Shown on the Browse screen when the top-games request fails."
+  },
+  "browseEmpty": {
+    "message": "No games to show.",
+    "description": "Shown on the Browse screen when Twitch returns no games."
+  },
+  "browseLoadedAnnouncement": {
+    "message": "$COUNT$ games",
+    "description": "Screen-reader announcement when the games grid finishes loading.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "20"
+      }
+    }
+  },
+  "browseBackButton": {
+    "message": "Back to games",
+    "description": "Accessible label for the back button on a game’s stream list."
+  },
+  "gameStreamsError": {
+    "message": "Couldn’t load streams for this game.",
+    "description": "Shown when the per-game stream request fails."
+  },
+  "gameStreamsEmpty": {
+    "message": "Nobody is live in this category.",
+    "description": "Shown when a game has no live streams."
+  },
+  "gameStreamsLoadedAnnouncement": {
+    "message": "$COUNT$ streams",
+    "description": "Screen-reader announcement when a game’s stream list finishes loading.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "20"
+      }
+    }
   }
 }

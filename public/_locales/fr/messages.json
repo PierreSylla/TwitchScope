@@ -49,7 +49,7 @@
   },
   "tabBrowse": {
     "message": "Parcourir",
-    "description": "Tab label for the browse-by-game screen (not built yet)."
+    "description": "Tab label for the browse-by-game screen."
   },
   "tabSearch": {
     "message": "Rechercher",
@@ -208,5 +208,45 @@
   "settingsThemeDark": {
     "message": "Sombre",
     "description": "Theme option forcing the dark palette."
+  },
+  "browseError": {
+    "message": "Impossible de charger les jeux.",
+    "description": "Shown on the Browse screen when the top-games request fails."
+  },
+  "browseEmpty": {
+    "message": "Aucun jeu à afficher.",
+    "description": "Shown on the Browse screen when Twitch returns no games."
+  },
+  "browseLoadedAnnouncement": {
+    "message": "$COUNT$ jeux",
+    "description": "Screen-reader announcement when the games grid finishes loading.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "20"
+      }
+    }
+  },
+  "browseBackButton": {
+    "message": "Retour aux jeux",
+    "description": "Accessible label for the back button on a game’s stream list."
+  },
+  "gameStreamsError": {
+    "message": "Impossible de charger les streams de ce jeu.",
+    "description": "Shown when the per-game stream request fails."
+  },
+  "gameStreamsEmpty": {
+    "message": "Personne n’est en direct dans cette catégorie.",
+    "description": "Shown when a game has no live streams."
+  },
+  "gameStreamsLoadedAnnouncement": {
+    "message": "$COUNT$ streams",
+    "description": "Screen-reader announcement when a game’s stream list finishes loading.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "20"
+      }
+    }
   }
 }

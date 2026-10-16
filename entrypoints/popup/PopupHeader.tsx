@@ -1,13 +1,13 @@
 import { browser } from 'wxt/browser';
 import type { Density } from '@/lib/settings/types';
 
-export type Tab = 'followed' | 'popular';
+export type Tab = 'followed' | 'popular' | 'browse';
 
 /** `id: null` marks a tab whose screen does not exist yet (Browse/Search). */
 const TABS = [
   { id: 'followed', key: 'tabFollowed' },
   { id: 'popular', key: 'tabPopular' },
-  { id: null, key: 'tabBrowse' },
+  { id: 'browse', key: 'tabBrowse' },
   { id: null, key: 'tabSearch' },
 ] as const satisfies readonly { id: Tab | null; key: string }[];
 

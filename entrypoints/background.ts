@@ -6,6 +6,9 @@ import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
 import { createHelixClient, type HelixClient } from '@/lib/helix/client';
 import { HelixAuthError } from '@/lib/helix/types';
 import { getFollowedStreams, getTopStreams, type HelixStream } from '@/lib/helix/streams';
+import { getTopGames } from '@/lib/helix/games';
+import { toGameViews } from '@/lib/games/mapper';
+import type { GamesMessage, GamesResponse } from '@/lib/games/types';
 import { getUsersByIds } from '@/lib/helix/users';
 import { toStreamViews } from '@/lib/streams/mapper';
 import {
@@ -29,6 +32,7 @@ const helixClient: HelixClient = createHelixClient({
 });
 
 const TOP_STREAMS_PAGE_SIZE = 20;
+const TOP_GAMES_PAGE_SIZE = 20;
 
 interface StreamsPage {
   streams: HelixStream[];
@@ -95,8 +99,22 @@ async function schedulePolling() {
   browser.alarms.create(POLL_ALARM, { periodInMinutes: intervalMinutes });
 }
 
-type AppMessage = AuthMessage | StreamsMessage;
-type AppResponse = AuthResponse | StreamsResponse;
+async function respondWithTopGames(cursor?: string): Promise<GamesResponse> {
+  if (!(await getSession())) return { ok: false, error: 'not_connected' };
+  try {
+    const { games, cursor: next } = await getTopGames(helixClient, {
+      first: TOP_GAMES_PAGE_SIZE,
+      after: cursor,
+    });
+    return { ok: true, games: toGameViews(games), cursor: next };
+  } catch (err) {
+    if (err instanceof HelixAuthError) return { ok: false, error: 'not_connected' };
+    return { ok: false, error: 'fetch_failed' };
+  }
+}
+
+type AppMessage = AuthMessage | StreamsMessage | GamesMessage;
+type AppResponse = AuthResponse | StreamsResponse | GamesResponse;
 
 async function handleMessage(message: AppMessage): Promise<AppResponse> {
   switch (message.type) {
@@ -123,6 +141,16 @@ async function handleMessage(message: AppMessage): Promise<AppResponse> {
       return respondWithStreams(() =>
         getTopStreams(helixClient, { first: TOP_STREAMS_PAGE_SIZE, after: message.cursor }),
       );
+    case 'streams/getByGame':
+      return respondWithStreams(() =>
+        getTopStreams(helixClient, {
+          first: TOP_STREAMS_PAGE_SIZE,
+          after: message.cursor,
+          gameId: message.gameId,
+        }),
+      );
+    case 'games/getTop':
+      return respondWithTopGames(message.cursor);
   }
 }
 

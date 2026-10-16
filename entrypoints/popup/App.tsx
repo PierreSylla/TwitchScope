@@ -26,6 +26,7 @@ import PopupHeader, { type Tab } from './PopupHeader';
 import PopupSettings from './PopupSettings';
 import FollowedView from './FollowedView';
 import PopularView from './PopularView';
+import BrowseView from './BrowseView';
 import { StreamSkeleton } from './StreamStates';
 
 type Auth = 'loading' | 'connected' | 'disconnected';
@@ -161,19 +162,15 @@ function App() {
       {/* The key resets the active screen, so refresh also clears Popular's pages.
           ponytail: switching tabs refetches; lift the screens' state here if that bites. */}
       {auth === 'connected' &&
-        (tab === 'popular' ? (
-          <PopularView
-            key={`popular-${refreshKey}`}
-            density={density}
-            onDisconnected={() => setAuth('disconnected')}
-          />
-        ) : (
-          <FollowedView
-            key={`followed-${refreshKey}`}
-            density={density}
-            onDisconnected={() => setAuth('disconnected')}
-          />
-        ))}
+        (() => {
+          const key = `${tab}-${refreshKey}`;
+          const onDisconnected = () => setAuth('disconnected');
+          if (tab === 'popular')
+            return <PopularView key={key} density={density} onDisconnected={onDisconnected} />;
+          if (tab === 'browse')
+            return <BrowseView key={key} density={density} onDisconnected={onDisconnected} />;
+          return <FollowedView key={key} density={density} onDisconnected={onDisconnected} />;
+        })()}
     </div>
   );
 }

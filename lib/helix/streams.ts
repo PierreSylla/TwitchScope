@@ -32,11 +32,11 @@ export interface TopStreamsPage {
 
 export async function getTopStreams(
   client: HelixClient,
-  { first, after }: { first: number; after?: string },
+  { first, after, gameId }: { first: number; after?: string; gameId?: string },
 ): Promise<TopStreamsPage> {
   const response = await client.request<HelixStream>({
     path: '/streams',
-    searchParams: { first: String(first), after },
+    searchParams: { first: String(first), after, game_id: gameId },
   });
   return { streams: response.data, cursor: response.pagination?.cursor };
 }
