@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Open in a real tab: the embedded chrome://extensions/about:addons iframe
+         measures height once and doesn't reliably re-measure as React renders
+         async content, which can clip sections below the fold. -->
+    <meta name="manifest.open_in_tab" content="true" />
     <title>TwitchScope — Settings</title>
   </head>
   <body>
