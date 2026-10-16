@@ -61,7 +61,7 @@
   },
   "settingsButton": {
     "message": "Réglages",
-    "description": "Accessible label for the settings icon button that opens the options page."
+    "description": "Accessible label for the settings icon button that opens the inline settings view in the popup."
   },
   "liveBadge": {
     "message": "LIVE",
@@ -134,5 +134,9 @@
   "settingsDensityComfortable": {
     "message": "Confortable",
     "description": "Option label for comfortable display density."
+  },
+  "settingsBackButton": {
+    "message": "Retour",
+    "description": "Accessible label for the back button that returns from the popup's inline settings view."
   }
 }

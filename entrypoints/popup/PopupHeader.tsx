@@ -8,9 +8,10 @@ interface PopupHeaderProps {
   showChrome: boolean;
   density: Density;
   onRefresh?: () => void;
+  onSettings: () => void;
 }
 
-function PopupHeader({ showChrome, density, onRefresh }: PopupHeaderProps) {
+function PopupHeader({ showChrome, density, onRefresh, onSettings }: PopupHeaderProps) {
   const compact = density === 'compact';
 
   return (
@@ -42,7 +43,7 @@ function PopupHeader({ showChrome, density, onRefresh }: PopupHeaderProps) {
             </button>
             <button
               type="button"
-              onClick={() => browser.runtime.openOptionsPage()}
+              onClick={onSettings}
               aria-label={browser.i18n.getMessage('settingsButton')}
               className={`flex items-center justify-center rounded-lg text-ink-muted hover:bg-tile ${compact ? 'h-5 w-5 text-xs' : 'h-6 w-6 text-sm'}`}
             >

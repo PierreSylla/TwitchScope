@@ -1,2 +1,6 @@
 @import 'tailwindcss';
 @import '../../assets/theme.css';
+
+body {
+  background: var(--color-panel);
+}
