@@ -5,28 +5,33 @@ import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
 import {
   getDensity,
   getNotificationSettings,
+  getTheme,
   setDensity,
   setNotificationSettings,
+  setTheme,
 } from '@/lib/settings/storage';
 import {
   DEFAULT_DENSITY,
   DEFAULT_NOTIFICATION_SETTINGS,
+  DEFAULT_THEME,
   POLLING_INTERVAL_OPTIONS,
   type Density,
   type NotificationSettings,
+  type Theme,
 } from '@/lib/settings/types';
+import { applyTheme } from '@/lib/settings/theme';
 import {
   IntervalSelect,
   SegmentedControl,
   SettingsRow,
   ToggleSwitch,
 } from '@/components/SettingsControls';
-import { DENSITY_OPTIONS, intervalLabel } from '@/lib/settings/labels';
+import { DENSITY_OPTIONS, intervalLabel, THEME_OPTIONS } from '@/lib/settings/labels';
 
 function SectionHeading({
   messageKey,
 }: {
-  messageKey: 'settingsDensityLabel' | 'settingsNotificationsLabel';
+  messageKey: 'settingsDensityLabel' | 'settingsNotificationsLabel' | 'settingsThemeLabel';
 }) {
   return (
     <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
@@ -51,6 +56,27 @@ function DensitySection() {
     <section className="flex flex-col gap-3">
       <SectionHeading messageKey="settingsDensityLabel" />
       <SegmentedControl options={DENSITY_OPTIONS} value={density} onChange={handleSelect} />
+    </section>
+  );
+}
+
+function ThemeSection() {
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
+
+  useEffect(() => {
+    getTheme().then(setThemeState);
+  }, []);
+
+  async function handleSelect(next: Theme) {
+    setThemeState(next);
+    applyTheme(next);
+    await setTheme(next);
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <SectionHeading messageKey="settingsThemeLabel" />
+      <SegmentedControl options={THEME_OPTIONS} value={theme} onChange={handleSelect} />
     </section>
   );
 }
@@ -205,6 +231,7 @@ function App() {
       <div className="flex flex-col gap-8 p-8">
         <AccountSection />
         <NotificationsSection />
+        <ThemeSection />
         <DensitySection />
       </div>
     </div>

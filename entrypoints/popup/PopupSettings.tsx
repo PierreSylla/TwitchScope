@@ -1,20 +1,24 @@
 import { browser } from 'wxt/browser';
-import type { Density, NotificationSettings } from '@/lib/settings/types';
-import { DENSITY_OPTIONS } from '@/lib/settings/labels';
+import type { Density, NotificationSettings, Theme } from '@/lib/settings/types';
+import { DENSITY_OPTIONS, THEME_OPTIONS } from '@/lib/settings/labels';
 import { SegmentedControl, SettingsRow, ToggleSwitch } from '@/components/SettingsControls';
 
 interface PopupSettingsProps {
   density: Density;
+  theme: Theme;
   notifications: NotificationSettings;
   onDensityChange: (next: Density) => void;
+  onThemeChange: (next: Theme) => void;
   onNotificationsChange: (next: NotificationSettings) => void;
   onBack: () => void;
 }
 
 function PopupSettings({
   density,
+  theme,
   notifications,
   onDensityChange,
+  onThemeChange,
   onNotificationsChange,
   onBack,
 }: PopupSettingsProps) {
@@ -45,6 +49,12 @@ function PopupSettings({
               onChange={(enabled) => onNotificationsChange({ ...notifications, enabled })}
             />
           </SettingsRow>
+        </section>
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            {browser.i18n.getMessage('settingsThemeLabel')}
+          </h2>
+          <SegmentedControl options={THEME_OPTIONS} value={theme} onChange={onThemeChange} />
         </section>
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">

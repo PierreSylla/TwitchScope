@@ -9,7 +9,6 @@ export function newlyLive(previous: string[] | null, current: StreamView[]): Str
   return current.filter((stream) => !before.has(stream.login));
 }
 
-
 export async function getLiveBaseline(): Promise<string[] | null> {
   const stored = await browser.storage.session.get(LIVE_SET_KEY);
   const logins = stored[LIVE_SET_KEY] as string[] | undefined;

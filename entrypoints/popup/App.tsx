@@ -6,16 +6,22 @@ import {
   DENSITY_KEY,
   getDensity,
   getNotificationSettings,
+  getTheme,
   NOTIFICATIONS_KEY,
   setDensity,
   setNotificationSettings,
+  setTheme,
+  THEME_KEY,
 } from '@/lib/settings/storage';
 import {
   DEFAULT_DENSITY,
   DEFAULT_NOTIFICATION_SETTINGS,
+  DEFAULT_THEME,
   type Density,
   type NotificationSettings,
+  type Theme,
 } from '@/lib/settings/types';
+import { applyTheme } from '@/lib/settings/theme';
 import PopupHeader, { type Tab } from './PopupHeader';
 import PopupSettings from './PopupSettings';
 import FollowedView from './FollowedView';
@@ -31,6 +37,7 @@ function App() {
   const [notifications, setNotificationsState] = useState<NotificationSettings>(
     DEFAULT_NOTIFICATION_SETTINGS,
   );
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
   const [showSettings, setShowSettings] = useState(false);
   const [tab, setTab] = useState<Tab>('followed');
   const [refreshKey, setRefreshKey] = useState(0);
@@ -38,6 +45,7 @@ function App() {
   useEffect(() => {
     getDensity().then(setDensityState);
     getNotificationSettings().then(setNotificationsState);
+    getTheme().then(setThemeState);
     // The popup can stay mounted while its devtools are attached, and both of
     // these settings also exist on the options page, so a change made there
     // needs to apply live too.
@@ -48,6 +56,11 @@ function App() {
       if (area !== 'sync') return;
       if (changes[DENSITY_KEY]) {
         setDensityState(changes[DENSITY_KEY].newValue as Density);
+      }
+      if (changes[THEME_KEY]) {
+        const next = (changes[THEME_KEY].newValue as Theme | undefined) ?? DEFAULT_THEME;
+        setThemeState(next);
+        applyTheme(next);
       }
       if (changes[NOTIFICATIONS_KEY]) {
         setNotificationsState({
@@ -80,6 +93,12 @@ function App() {
     await setDensity(next);
   }
 
+  async function handleThemeChange(next: Theme) {
+    setThemeState(next);
+    applyTheme(next);
+    await setTheme(next);
+  }
+
   async function handleNotificationsChange(next: NotificationSettings) {
     setNotificationsState(next);
     await setNotificationSettings(next);
@@ -93,8 +112,10 @@ function App() {
       <div className={`${panel} rounded-2xl`}>
         <PopupSettings
           density={density}
+          theme={theme}
           notifications={notifications}
           onDensityChange={handleDensityChange}
+          onThemeChange={handleThemeChange}
           onNotificationsChange={handleNotificationsChange}
           onBack={() => setShowSettings(false)}
         />

@@ -7,8 +7,9 @@
   --color-hairline: #e4e4e7;
 }
 
+/* No data-theme means "auto": follow the system. An explicit light choice opts out. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --color-brand: #a78bfa;
     --color-ink: #f4f4f5;
     --color-ink-muted: #a1a1aa;
@@ -16,4 +17,13 @@
     --color-tile: #1c1c21;
     --color-hairline: #2c2c33;
   }
+}
+
+:root[data-theme='dark'] {
+  --color-brand: #a78bfa;
+  --color-ink: #f4f4f5;
+  --color-ink-muted: #a1a1aa;
+  --color-panel: #0e0e10;
+  --color-tile: #1c1c21;
+  --color-hairline: #2c2c33;
 }

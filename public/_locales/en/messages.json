@@ -192,5 +192,21 @@
         "example": "NovaPlays"
       }
     }
+  },
+  "settingsThemeLabel": {
+    "message": "Theme",
+    "description": "Section label for the theme setting."
+  },
+  "settingsThemeAuto": {
+    "message": "Auto",
+    "description": "Theme option following the system preference."
+  },
+  "settingsThemeLight": {
+    "message": "Light",
+    "description": "Theme option forcing the light palette."
+  },
+  "settingsThemeDark": {
+    "message": "Dark",
+    "description": "Theme option forcing the dark palette."
   }
 }
