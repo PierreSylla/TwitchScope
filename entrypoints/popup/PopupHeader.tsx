@@ -1,17 +1,34 @@
 import { browser } from 'wxt/browser';
 import type { Density } from '@/lib/settings/types';
 
-const TAB_KEYS = ['tabFollowed', 'tabPopular', 'tabBrowse', 'tabSearch'] as const;
+export type Tab = 'followed' | 'popular';
+
+/** `id: null` marks a tab whose screen does not exist yet (Browse/Search). */
+const TABS = [
+  { id: 'followed', key: 'tabFollowed' },
+  { id: 'popular', key: 'tabPopular' },
+  { id: null, key: 'tabBrowse' },
+  { id: null, key: 'tabSearch' },
+] as const satisfies readonly { id: Tab | null; key: string }[];
 
 interface PopupHeaderProps {
   /** Icons + tabs only make sense once the user is connected. */
   showChrome: boolean;
   density: Density;
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
   onRefresh?: () => void;
   onSettings: () => void;
 }
 
-function PopupHeader({ showChrome, density, onRefresh, onSettings }: PopupHeaderProps) {
+function PopupHeader({
+  showChrome,
+  density,
+  activeTab,
+  onTabChange,
+  onRefresh,
+  onSettings,
+}: PopupHeaderProps) {
   const compact = density === 'compact';
 
   return (
@@ -53,18 +70,26 @@ function PopupHeader({ showChrome, density, onRefresh, onSettings }: PopupHeader
         )}
       </div>
       {showChrome && (
-        <div className="flex border-b border-hairline">
-          {TAB_KEYS.map((key, index) => (
-            <span
+        <nav className="flex border-b border-hairline">
+          {TABS.map(({ id, key }) => (
+            <button
               key={key}
-              className={`flex-1 border-b-2 text-center font-semibold ${compact ? 'py-1.5 text-[11px]' : 'py-[9px] text-xs'} ${
-                index === 0 ? 'border-brand text-brand' : 'border-transparent text-ink-muted'
+              type="button"
+              disabled={id === null}
+              aria-current={id !== null && id === activeTab ? 'page' : undefined}
+              onClick={id === null ? undefined : () => onTabChange(id)}
+              className={`flex-1 border-b-2 text-center font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand ${
+                compact ? 'py-1.5 text-[11px]' : 'py-[9px] text-xs'
+              } ${
+                id !== null && id === activeTab
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-ink-muted'
               }`}
             >
               {browser.i18n.getMessage(key)}
-            </span>
+            </button>
           ))}
-        </div>
+        </nav>
       )}
     </div>
   );

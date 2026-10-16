@@ -24,3 +24,19 @@ export async function getFollowedStreams(
   });
   return response.data;
 }
+
+export interface TopStreamsPage {
+  streams: HelixStream[];
+  cursor?: string;
+}
+
+export async function getTopStreams(
+  client: HelixClient,
+  { first, after }: { first: number; after?: string },
+): Promise<TopStreamsPage> {
+  const response = await client.request<HelixStream>({
+    path: '/streams',
+    searchParams: { first: String(first), after },
+  });
+  return { streams: response.data, cursor: response.pagination?.cursor };
+}

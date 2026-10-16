@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sizeThumbnail, toFollowedStreamViews } from './mapper';
+import { sizeThumbnail, toStreamViews } from './mapper';
 import type { HelixStream } from '../helix/streams';
 import type { HelixUser } from '../helix/users';
 
@@ -11,7 +11,7 @@ describe('sizeThumbnail', () => {
   });
 });
 
-describe('toFollowedStreamViews', () => {
+describe('toStreamViews', () => {
   const streams: HelixStream[] = [
     {
       id: '1',
@@ -42,7 +42,7 @@ describe('toFollowedStreamViews', () => {
   ];
 
   it('sorts by viewer count descending', () => {
-    const views = toFollowedStreamViews(streams, new Map());
+    const views = toStreamViews(streams, new Map());
     expect(views.map((v) => v.login)).toEqual(['big', 'small']);
   });
 
@@ -50,7 +50,7 @@ describe('toFollowedStreamViews', () => {
     const users = new Map<string, HelixUser>([
       ['u1', { id: 'u1', login: 'small', display_name: 'Small', profile_image_url: 'a.jpg' }],
     ]);
-    const views = toFollowedStreamViews(streams, users);
+    const views = toStreamViews(streams, users);
 
     expect(views.find((v) => v.login === 'small')?.avatarUrl).toBe('a.jpg');
     expect(views.find((v) => v.login === 'big')?.avatarUrl).toBeNull();

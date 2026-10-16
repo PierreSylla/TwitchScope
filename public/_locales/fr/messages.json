@@ -45,7 +45,7 @@
   },
   "tabPopular": {
     "message": "Populaire",
-    "description": "Tab label for the popular streams screen (not built yet)."
+    "description": "Tab label for the popular streams screen."
   },
   "tabBrowse": {
     "message": "Parcourir",
@@ -138,5 +138,27 @@
   "settingsBackButton": {
     "message": "Retour",
     "description": "Accessible label for the back button that returns from the popup's inline settings view."
+  },
+  "loadMoreButton": {
+    "message": "Charger plus",
+    "description": "Button at the bottom of the Popular list that fetches the next page of streams."
+  },
+  "popularError": {
+    "message": "Impossible de charger les streams populaires.",
+    "description": "Shown on the Popular screen when the streams request fails."
+  },
+  "popularEmpty": {
+    "message": "Aucun stream n'est en direct pour le moment.",
+    "description": "Shown on the Popular screen when Twitch returns no streams."
+  },
+  "popularLoadedAnnouncement": {
+    "message": "$COUNT$ streams populaires",
+    "description": "Screen-reader announcement when the popular streams list finishes loading.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "20"
+      }
+    }
   }
 }

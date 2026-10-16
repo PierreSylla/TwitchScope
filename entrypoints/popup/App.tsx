@@ -2,55 +2,23 @@ import { useEffect, useState } from 'react';
 import { browser, type Browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
-import type { StreamsMessage, StreamsResponse } from '@/lib/streams/types';
-import type { FollowedStreamView } from '@/lib/streams/types';
 import { getDensity, setDensity } from '@/lib/settings/storage';
 import { DEFAULT_DENSITY, type Density } from '@/lib/settings/types';
-import PopupHeader from './PopupHeader';
+import PopupHeader, { type Tab } from './PopupHeader';
 import PopupSettings from './PopupSettings';
-import StreamCard from './StreamCard';
+import FollowedView from './FollowedView';
+import PopularView from './PopularView';
+import { StreamSkeleton } from './StreamStates';
 
-type ViewState =
-  | { kind: 'authLoading' }
-  | { kind: 'disconnected' }
-  | { kind: 'streamsLoading' }
-  | { kind: 'streamsError' }
-  | { kind: 'streamsEmpty' }
-  | { kind: 'streamsLoaded'; streams: FollowedStreamView[] };
-
-function announce(state: ViewState): string {
-  switch (state.kind) {
-    case 'authLoading':
-    case 'streamsLoading':
-      return browser.i18n.getMessage('authLoading');
-    case 'disconnected':
-      return browser.i18n.getMessage('followedDisconnectedTitle');
-    case 'streamsError':
-      return browser.i18n.getMessage('followedError');
-    case 'streamsEmpty':
-      return browser.i18n.getMessage('followedEmpty');
-    case 'streamsLoaded':
-      return browser.i18n.getMessage('followedLoadedAnnouncement', [String(state.streams.length)]);
-  }
-}
-
-async function loadStreams(): Promise<ViewState> {
-  const res = await sendMessage<StreamsResponse>({
-    type: 'streams/getFollowed',
-  } satisfies StreamsMessage);
-  if (!res.ok)
-    return res.error === 'not_connected' ? { kind: 'disconnected' } : { kind: 'streamsError' };
-  return res.streams.length === 0
-    ? { kind: 'streamsEmpty' }
-    : { kind: 'streamsLoaded', streams: res.streams };
-}
+type Auth = 'loading' | 'connected' | 'disconnected';
 
 function App() {
-  const [state, setState] = useState<ViewState>({ kind: 'authLoading' });
+  const [auth, setAuth] = useState<Auth>('loading');
   const [connecting, setConnecting] = useState(false);
   const [density, setDensityState] = useState<Density>(DEFAULT_DENSITY);
   const [showSettings, setShowSettings] = useState(false);
-  const compact = density === 'compact';
+  const [tab, setTab] = useState<Tab>('followed');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     getDensity().then(setDensityState);
@@ -70,12 +38,7 @@ function App() {
       const authRes = await sendMessage<AuthResponse>({
         type: 'auth/getStatus',
       } satisfies AuthMessage);
-      if (!authRes.ok || !authRes.status.connected) {
-        setState({ kind: 'disconnected' });
-        return;
-      }
-      setState({ kind: 'streamsLoading' });
-      setState(await loadStreams());
+      setAuth(!authRes.ok || !authRes.status.connected ? 'disconnected' : 'connected');
     })();
 
     return () => browser.storage.onChanged.removeListener(handleStorageChange);
@@ -85,14 +48,7 @@ function App() {
     setConnecting(true);
     const res = await sendMessage<AuthResponse>({ type: 'auth/login' } satisfies AuthMessage);
     setConnecting(false);
-    if (!res.ok || !res.status.connected) return;
-    setState({ kind: 'streamsLoading' });
-    setState(await loadStreams());
-  }
-
-  async function handleRefresh() {
-    setState({ kind: 'streamsLoading' });
-    setState(await loadStreams());
+    if (res.ok && res.status.connected) setAuth('connected');
   }
 
   async function handleDensityChange(next: Density) {
@@ -100,12 +56,12 @@ function App() {
     await setDensity(next);
   }
 
-  const showChrome = state.kind !== 'authLoading' && state.kind !== 'disconnected';
-  const listPadding = compact ? 'gap-1 p-2' : 'gap-3 p-3';
+  const panel =
+    'w-[380px] overflow-hidden border border-hairline bg-panel text-sm shadow-[0_1px_3px_rgba(0,0,0,.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,.3)]';
 
   if (showSettings) {
     return (
-      <div className="w-[380px] overflow-hidden rounded-2xl border border-hairline bg-panel text-sm shadow-[0_1px_3px_rgba(0,0,0,.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,.3)]">
+      <div className={`${panel} rounded-2xl`}>
         <PopupSettings
           density={density}
           onDensityChange={handleDensityChange}
@@ -116,38 +72,19 @@ function App() {
   }
 
   return (
-    <div className="w-[380px] overflow-hidden border border-hairline bg-panel text-sm shadow-[0_1px_3px_rgba(0,0,0,.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,.3)]">
+    <div className={panel}>
       <PopupHeader
-        showChrome={showChrome}
+        showChrome={auth === 'connected'}
         density={density}
-        onRefresh={handleRefresh}
+        activeTab={tab}
+        onTabChange={setTab}
+        onRefresh={() => setRefreshKey((n) => n + 1)}
         onSettings={() => setShowSettings(true)}
       />
-      <p className="sr-only" aria-live="polite">
-        {announce(state)}
-      </p>
 
-      {(state.kind === 'authLoading' || state.kind === 'streamsLoading') && (
-        <div className={`flex min-h-[460px] flex-col ${listPadding}`}>
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="overflow-hidden rounded-xl border border-hairline bg-tile">
-              <div className="aspect-video bg-hairline" />
-              <div className="flex flex-col gap-2 p-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-hairline" />
-                  <div className="flex flex-1 flex-col gap-1">
-                    <div className="h-2 w-3/5 rounded bg-hairline" />
-                    <div className="h-1.5 w-2/5 rounded bg-hairline" />
-                  </div>
-                </div>
-                <div className="h-1.5 w-4/5 rounded bg-hairline" />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {auth === 'loading' && <StreamSkeleton density={density} />}
 
-      {state.kind === 'disconnected' && (
+      {auth === 'disconnected' && (
         <div className="flex min-h-[504px] flex-col items-center justify-center gap-3.5 p-8 text-center">
           <span className="relative block h-12 w-12 rounded-full border-2 border-brand">
             <span className="absolute -bottom-px -right-px block h-3.5 w-3.5 rounded-full bg-brand" />
@@ -169,43 +106,22 @@ function App() {
         </div>
       )}
 
-      {state.kind === 'streamsError' && (
-        <div className="flex min-h-[504px] flex-col items-center justify-center gap-3.5 p-8 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-red-500 text-lg font-bold text-red-500">
-            !
-          </div>
-          <p className="max-w-[260px] text-[13px] leading-relaxed text-ink-muted">
-            {browser.i18n.getMessage('followedError')}
-          </p>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            className="rounded-lg border border-hairline px-[18px] py-[9px] text-[13px] font-semibold text-ink"
-          >
-            {browser.i18n.getMessage('authRetryButton')}
-          </button>
-        </div>
-      )}
-
-      {state.kind === 'streamsEmpty' && (
-        <div className="flex min-h-[504px] flex-col items-center justify-center gap-3 p-8 text-center">
-          <span className="block h-11 w-11 rounded-full border-2 border-hairline" />
-          <p className="max-w-[260px] text-[13px] leading-relaxed text-ink-muted">
-            {browser.i18n.getMessage('followedEmpty')}
-          </p>
-          <span className="text-[13px] font-semibold text-brand">
-            {browser.i18n.getMessage('followedEmptyCta')}
-          </span>
-        </div>
-      )}
-
-      {state.kind === 'streamsLoaded' && (
-        <div className={`flex h-[504px] flex-col overflow-y-auto ${listPadding}`}>
-          {state.streams.map((stream) => (
-            <StreamCard key={stream.id} stream={stream} density={density} />
-          ))}
-        </div>
-      )}
+      {/* The key resets the active screen, so refresh also clears Popular's pages.
+          ponytail: switching tabs refetches; lift the screens' state here if that bites. */}
+      {auth === 'connected' &&
+        (tab === 'popular' ? (
+          <PopularView
+            key={`popular-${refreshKey}`}
+            density={density}
+            onDisconnected={() => setAuth('disconnected')}
+          />
+        ) : (
+          <FollowedView
+            key={`followed-${refreshKey}`}
+            density={density}
+            onDisconnected={() => setAuth('disconnected')}
+          />
+        ))}
     </div>
   );
 }

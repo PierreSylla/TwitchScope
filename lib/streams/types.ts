@@ -1,4 +1,4 @@
-export interface FollowedStreamView {
+export interface StreamView {
   id: string;
   channel: string;
   login: string;
@@ -10,7 +10,8 @@ export interface FollowedStreamView {
   avatarUrl: string | null;
 }
 
-export type StreamsMessage = { type: 'streams/getFollowed' };
+export type StreamsMessage =
+  { type: 'streams/getFollowed' } | { type: 'streams/getTop'; cursor?: string };
 
 export type StreamsResponse =
-  { ok: true; streams: FollowedStreamView[] } | { ok: false; error: string };
+  { ok: true; streams: StreamView[]; cursor?: string } | { ok: false; error: string };

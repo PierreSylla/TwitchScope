@@ -5,9 +5,9 @@ import { clearSession, getSession } from '@/lib/auth/storage';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
 import { createHelixClient, type HelixClient } from '@/lib/helix/client';
 import { HelixAuthError } from '@/lib/helix/types';
-import { getFollowedStreams } from '@/lib/helix/streams';
+import { getFollowedStreams, getTopStreams, type HelixStream } from '@/lib/helix/streams';
 import { getUsersByIds } from '@/lib/helix/users';
-import { toFollowedStreamViews } from '@/lib/streams/mapper';
+import { toStreamViews } from '@/lib/streams/mapper';
 import type { StreamsMessage, StreamsResponse } from '@/lib/streams/types';
 
 const TOKEN_VALIDATION_ALARM = 'auth-token-validate';
@@ -17,15 +17,24 @@ const helixClient: HelixClient = createHelixClient({
   onUnauthorized: () => clearSession(),
 });
 
-async function getFollowedStreamsForCurrentUser(): Promise<StreamsResponse> {
+const TOP_STREAMS_PAGE_SIZE = 20;
+
+interface StreamsPage {
+  streams: HelixStream[];
+  cursor?: string;
+}
+
+async function respondWithStreams(
+  load: (userId: string) => Promise<StreamsPage>,
+): Promise<StreamsResponse> {
   const session = await getSession();
   if (!session) return { ok: false, error: 'not_connected' };
 
   try {
-    const streams = await getFollowedStreams(helixClient, session.userId);
+    const { streams, cursor } = await load(session.userId);
     const users = await getUsersByIds(helixClient, [...new Set(streams.map((s) => s.user_id))]);
     const usersById = new Map(users.map((u) => [u.id, u]));
-    return { ok: true, streams: toFollowedStreamViews(streams, usersById) };
+    return { ok: true, streams: toStreamViews(streams, usersById), cursor };
   } catch (err) {
     if (err instanceof HelixAuthError) return { ok: false, error: 'not_connected' };
     return { ok: false, error: 'fetch_failed' };
@@ -44,7 +53,13 @@ async function handleMessage(message: AppMessage): Promise<AppResponse> {
     case 'auth/logout':
       return logout();
     case 'streams/getFollowed':
-      return getFollowedStreamsForCurrentUser();
+      return respondWithStreams(async (userId) => ({
+        streams: await getFollowedStreams(helixClient, userId),
+      }));
+    case 'streams/getTop':
+      return respondWithStreams(() =>
+        getTopStreams(helixClient, { first: TOP_STREAMS_PAGE_SIZE, after: message.cursor }),
+      );
   }
 }
 

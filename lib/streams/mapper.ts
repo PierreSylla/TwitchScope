@@ -1,6 +1,6 @@
 import type { HelixStream } from '../helix/streams';
 import type { HelixUser } from '../helix/users';
-import type { FollowedStreamView } from './types';
+import type { StreamView } from './types';
 
 const THUMBNAIL_WIDTH = 440;
 const THUMBNAIL_HEIGHT = 248;
@@ -11,10 +11,10 @@ export function sizeThumbnail(url: string): string {
     .replace('{height}', String(THUMBNAIL_HEIGHT));
 }
 
-export function toFollowedStreamViews(
+export function toStreamViews(
   streams: HelixStream[],
   usersById: Map<string, HelixUser>,
-): FollowedStreamView[] {
+): StreamView[] {
   return streams
     .map((s) => ({
       id: s.id,

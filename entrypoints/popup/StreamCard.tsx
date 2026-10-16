@@ -1,10 +1,10 @@
 import { browser } from 'wxt/browser';
 import { formatDuration, formatViewerCount } from '@/lib/streams/format';
-import type { FollowedStreamView } from '@/lib/streams/types';
+import type { StreamView } from '@/lib/streams/types';
 import type { Density } from '@/lib/settings/types';
 
 interface StreamCardProps {
-  stream: FollowedStreamView;
+  stream: StreamView;
   density: Density;
 }
 
