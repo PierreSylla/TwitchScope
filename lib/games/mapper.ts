@@ -4,12 +4,16 @@ import type { GameView } from './types';
 const BOX_ART_WIDTH = 285;
 const BOX_ART_HEIGHT = 380;
 
-export function sizeBoxArt(url: string): string {
+export function sizeBoxArt(
+  url: string,
+  width: number = BOX_ART_WIDTH,
+  height: number = BOX_ART_HEIGHT,
+): string {
   return url
-    .replace('{width}', String(BOX_ART_WIDTH))
-    .replace('{height}', String(BOX_ART_HEIGHT))
-    .replace('%7Bwidth%7D', String(BOX_ART_WIDTH))
-    .replace('%7Bheight%7D', String(BOX_ART_HEIGHT));
+    .replace('{width}', String(width))
+    .replace('{height}', String(height))
+    .replace('%7Bwidth%7D', String(width))
+    .replace('%7Bheight%7D', String(height));
 }
 
 export function toGameViews(games: HelixGame[]): GameView[] {

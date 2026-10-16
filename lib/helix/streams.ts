@@ -40,3 +40,15 @@ export async function getTopStreams(
   });
   return { streams: response.data, cursor: response.pagination?.cursor };
 }
+
+export async function getStreamsByUserIds(
+  client: HelixClient,
+  userIds: string[],
+): Promise<HelixStream[]> {
+  if (userIds.length === 0) return [];
+  const response = await client.request<HelixStream>({
+    path: '/streams',
+    searchParams: { user_id: userIds, first: String(userIds.length) },
+  });
+  return response.data;
+}

@@ -53,7 +53,7 @@
   },
   "tabSearch": {
     "message": "Rechercher",
-    "description": "Tab label for the search screen (not built yet)."
+    "description": "Tab label for the search screen."
   },
   "refreshButton": {
     "message": "Rafraîchir",
@@ -246,6 +246,44 @@
       "count": {
         "content": "$1",
         "example": "20"
+      }
+    }
+  },
+  "searchPlaceholder": {
+    "message": "Rechercher une chaîne ou un jeu…",
+    "description": "Placeholder of the search input."
+  },
+  "searchLiveOnly": {
+    "message": "Live uniquement",
+    "description": "Label of the toggle restricting channel results to live channels."
+  },
+  "searchSectionChannels": {
+    "message": "Chaînes",
+    "description": "Heading of the channel results section."
+  },
+  "searchSectionCategories": {
+    "message": "Catégories",
+    "description": "Heading of the category results section."
+  },
+  "searchOffline": {
+    "message": "Hors ligne",
+    "description": "Shown instead of a viewer count for a channel that is not live."
+  },
+  "searchError": {
+    "message": "Impossible d’effectuer la recherche.",
+    "description": "Shown when the search request fails."
+  },
+  "searchNoResults": {
+    "message": "Aucune chaîne ni jeu ne correspond.",
+    "description": "Shown when a search returns nothing."
+  },
+  "searchResultsAnnouncement": {
+    "message": "$COUNT$ résultats",
+    "description": "Screen-reader announcement when search results arrive.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
       }
     }
   }

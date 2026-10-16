@@ -27,6 +27,7 @@ import PopupSettings from './PopupSettings';
 import FollowedView from './FollowedView';
 import PopularView from './PopularView';
 import BrowseView from './BrowseView';
+import SearchView from './SearchView';
 import { StreamSkeleton } from './StreamStates';
 
 type Auth = 'loading' | 'connected' | 'disconnected';
@@ -169,6 +170,8 @@ function App() {
             return <PopularView key={key} density={density} onDisconnected={onDisconnected} />;
           if (tab === 'browse')
             return <BrowseView key={key} density={density} onDisconnected={onDisconnected} />;
+          if (tab === 'search')
+            return <SearchView key={key} density={density} onDisconnected={onDisconnected} />;
           return <FollowedView key={key} density={density} onDisconnected={onDisconnected} />;
         })()}
     </div>

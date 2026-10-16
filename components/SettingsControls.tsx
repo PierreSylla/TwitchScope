@@ -33,10 +33,15 @@ export function SegmentedControl<T extends string>({
 interface ToggleSwitchProps {
   checked: boolean;
   label: string;
+  size?: 'sm' | 'md';
   onChange: (next: boolean) => void;
 }
 
-export function ToggleSwitch({ checked, label, onChange }: ToggleSwitchProps) {
+const TRACK = { sm: 'h-[18px] w-8', md: 'h-5 w-9' } as const;
+const KNOB = { sm: 'h-3.5 w-3.5', md: 'h-4 w-4' } as const;
+const KNOB_ON = { sm: 'left-4', md: 'left-[18px]' } as const;
+
+export function ToggleSwitch({ checked, label, size = 'md', onChange }: ToggleSwitchProps) {
   return (
     <button
       type="button"
@@ -44,13 +49,13 @@ export function ToggleSwitch({ checked, label, onChange }: ToggleSwitchProps) {
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative h-5 w-9 flex-none rounded-full transition-colors motion-reduce:transition-none ${
+      className={`relative flex-none rounded-full transition-colors motion-reduce:transition-none ${TRACK[size]} ${
         checked ? 'bg-brand' : 'bg-hairline'
       }`}
     >
       <span
-        className={`absolute top-0.5 block h-4 w-4 rounded-full bg-white transition-all motion-reduce:transition-none ${
-          checked ? 'left-[18px]' : 'left-0.5'
+        className={`absolute top-0.5 block rounded-full bg-white transition-all motion-reduce:transition-none ${KNOB[size]} ${
+          checked ? KNOB_ON[size] : 'left-0.5'
         }`}
       />
     </button>

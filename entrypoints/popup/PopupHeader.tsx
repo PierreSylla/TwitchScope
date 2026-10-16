@@ -1,15 +1,14 @@
 import { browser } from 'wxt/browser';
 import type { Density } from '@/lib/settings/types';
 
-export type Tab = 'followed' | 'popular' | 'browse';
+export type Tab = 'followed' | 'popular' | 'browse' | 'search';
 
-/** `id: null` marks a tab whose screen does not exist yet (Browse/Search). */
 const TABS = [
   { id: 'followed', key: 'tabFollowed' },
   { id: 'popular', key: 'tabPopular' },
   { id: 'browse', key: 'tabBrowse' },
-  { id: null, key: 'tabSearch' },
-] as const satisfies readonly { id: Tab | null; key: string }[];
+  { id: 'search', key: 'tabSearch' },
+] as const satisfies readonly { id: Tab; key: string }[];
 
 interface PopupHeaderProps {
   /** Icons + tabs only make sense once the user is connected. */
@@ -75,15 +74,12 @@ function PopupHeader({
             <button
               key={key}
               type="button"
-              disabled={id === null}
-              aria-current={id !== null && id === activeTab ? 'page' : undefined}
-              onClick={id === null ? undefined : () => onTabChange(id)}
+              aria-current={id === activeTab ? 'page' : undefined}
+              onClick={() => onTabChange(id)}
               className={`flex-1 border-b-2 text-center font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand ${
                 compact ? 'py-1.5 text-[11px]' : 'py-[9px] text-xs'
               } ${
-                id !== null && id === activeTab
-                  ? 'border-brand text-brand'
-                  : 'border-transparent text-ink-muted'
+                id === activeTab ? 'border-brand text-brand' : 'border-transparent text-ink-muted'
               }`}
             >
               {browser.i18n.getMessage(key)}

@@ -7,6 +7,10 @@ import { createHelixClient, type HelixClient } from '@/lib/helix/client';
 import { HelixAuthError } from '@/lib/helix/types';
 import { getFollowedStreams, getTopStreams, type HelixStream } from '@/lib/helix/streams';
 import { getTopGames } from '@/lib/helix/games';
+import { searchCategories, searchChannels } from '@/lib/helix/search';
+import { getStreamsByUserIds } from '@/lib/helix/streams';
+import { channelId, toCategoryResults, toChannelResults } from '@/lib/search/mapper';
+import type { SearchMessage, SearchResponse } from '@/lib/search/types';
 import { toGameViews } from '@/lib/games/mapper';
 import type { GamesMessage, GamesResponse } from '@/lib/games/types';
 import { getUsersByIds } from '@/lib/helix/users';
@@ -33,6 +37,7 @@ const helixClient: HelixClient = createHelixClient({
 
 const TOP_STREAMS_PAGE_SIZE = 20;
 const TOP_GAMES_PAGE_SIZE = 20;
+const SEARCH_PAGE_SIZE = 20;
 
 interface StreamsPage {
   streams: HelixStream[];
@@ -113,8 +118,29 @@ async function respondWithTopGames(cursor?: string): Promise<GamesResponse> {
   }
 }
 
-type AppMessage = AuthMessage | StreamsMessage | GamesMessage;
-type AppResponse = AuthResponse | StreamsResponse | GamesResponse;
+async function respondWithSearch(query: string, liveOnly: boolean): Promise<SearchResponse> {
+  if (!(await getSession())) return { ok: false, error: 'not_connected' };
+  try {
+    const [channels, categories] = await Promise.all([
+      searchChannels(helixClient, { query, liveOnly, first: SEARCH_PAGE_SIZE }),
+      searchCategories(helixClient, { query, first: SEARCH_PAGE_SIZE }),
+    ]);
+    // /search/channels carries no viewer count, so ask /streams for the ones
+    // found; that answer also settles which of them are actually live.
+    const liveStreams = await getStreamsByUserIds(helixClient, channels.map(channelId));
+    return {
+      ok: true,
+      channels: toChannelResults(channels, liveStreams),
+      categories: toCategoryResults(categories),
+    };
+  } catch (err) {
+    if (err instanceof HelixAuthError) return { ok: false, error: 'not_connected' };
+    return { ok: false, error: 'fetch_failed' };
+  }
+}
+
+type AppMessage = AuthMessage | StreamsMessage | GamesMessage | SearchMessage;
+type AppResponse = AuthResponse | StreamsResponse | GamesResponse | SearchResponse;
 
 async function handleMessage(message: AppMessage): Promise<AppResponse> {
   switch (message.type) {
@@ -151,6 +177,8 @@ async function handleMessage(message: AppMessage): Promise<AppResponse> {
       );
     case 'games/getTop':
       return respondWithTopGames(message.cursor);
+    case 'search/run':
+      return respondWithSearch(message.query, message.liveOnly);
   }
 }
 

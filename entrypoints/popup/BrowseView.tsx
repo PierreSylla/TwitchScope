@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { GamesMessage, GamesResponse, GameView } from '@/lib/games/types';
-import type { StreamsMessage, StreamsResponse } from '@/lib/streams/types';
 import type { Density } from '@/lib/settings/types';
-import StreamPageList from './StreamPageList';
+import GameStreams from './GameStreams';
 import { StreamEmpty, StreamError, StreamSkeleton } from './StreamStates';
 
 type State =
@@ -71,36 +70,13 @@ function BrowseView({ density, onDisconnected }: BrowseViewProps) {
 
   if (selected) {
     return (
-      <>
-        <div className="flex h-9 items-center gap-2 border-b border-hairline px-2.5">
-          <button
-            type="button"
-            onClick={() => setSelected(null)}
-            aria-label={browser.i18n.getMessage('browseBackButton')}
-            className="flex h-6 w-6 flex-none items-center justify-center rounded-lg text-ink-muted hover:bg-tile focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand"
-          >
-            ←
-          </button>
-          <span className="truncate text-[13px] font-semibold text-ink">{selected.name}</span>
-        </div>
-        <StreamPageList
-          key={selected.id}
-          density={density}
-          errorMessage={browser.i18n.getMessage('gameStreamsError')}
-          emptyMessage={browser.i18n.getMessage('gameStreamsEmpty')}
-          announce={(count) =>
-            browser.i18n.getMessage('gameStreamsLoadedAnnouncement', [String(count)])
-          }
-          fetchPage={(cursor) =>
-            sendMessage<StreamsResponse>({
-              type: 'streams/getByGame',
-              gameId: selected.id,
-              cursor,
-            } satisfies StreamsMessage)
-          }
-          onDisconnected={onDisconnected}
-        />
-      </>
+      <GameStreams
+        gameId={selected.id}
+        gameName={selected.name}
+        density={density}
+        onBack={() => setSelected(null)}
+        onDisconnected={onDisconnected}
+      />
     );
   }
 
