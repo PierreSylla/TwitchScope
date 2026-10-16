@@ -15,6 +15,7 @@ import {
   setLiveBaseline,
 } from '@/lib/streams/liveSet';
 import { loginFromNotificationId, notificationIdFor } from '@/lib/streams/notifications';
+import { clearFollowedCache, setFollowedCache } from '@/lib/streams/cache';
 import type { StreamView, StreamsMessage, StreamsResponse } from '@/lib/streams/types';
 import { getNotificationSettings, NOTIFICATIONS_KEY } from '@/lib/settings/storage';
 
@@ -64,32 +65,29 @@ function notifyLive(stream: StreamView) {
   });
 }
 
-/** Polls followed streams to drive notifications and the badge. */
-async function pollFollowedStreams(notify: boolean) {
-  const session = await getSession();
-  if (!session) {
-    await setBadge(0);
-    return;
-  }
+function loadFollowed(userId: string) {
+  return getFollowedStreams(helixClient, userId).then((streams) => ({ streams }));
+}
 
-  let streams: StreamView[];
-  try {
-    const helixStreams = await getFollowedStreams(helixClient, session.userId);
-    // No avatars: the poll only needs identities and a count, and skipping
-    // GET /users halves its rate-limit cost.
-    streams = toStreamViews(helixStreams, new Map());
-  } catch {
-    return;
-  }
-
-  const settings = await getNotificationSettings();
-  if (notify && settings.enabled) {
-    const baseline = await getLiveBaseline();
-    for (const stream of newlyLive(baseline, streams)) notifyLive(stream);
-  }
-
+async function commitFollowed(streams: StreamView[]) {
   await setLiveBaseline(streams);
+  await setFollowedCache(streams);
   await setBadge(streams.length);
+}
+
+async function pollFollowedStreams(notify: boolean) {
+  const res = await respondWithStreams(loadFollowed);
+  if (!res.ok) {
+    if (res.error === 'not_connected') await setBadge(0);
+    return;
+  }
+
+  if (notify && (await getNotificationSettings()).enabled) {
+    const baseline = await getLiveBaseline();
+    for (const stream of newlyLive(baseline, res.streams)) notifyLive(stream);
+  }
+
+  await commitFollowed(res.streams);
 }
 
 async function schedulePolling() {
@@ -106,27 +104,19 @@ async function handleMessage(message: AppMessage): Promise<AppResponse> {
       return { ok: true, status: await getStatus() };
     case 'auth/login': {
       const res = await login();
-      // Fill the badge and the diff baseline right away rather than waiting a
-      // whole polling period; never notify for channels already live at login.
       if (res.ok && res.status.connected) await pollFollowedStreams(false);
       return res;
     }
     case 'auth/logout': {
       const res = await logout();
       await clearLiveBaseline();
+      await clearFollowedCache();
       await setBadge(0);
       return res;
     }
     case 'streams/getFollowed': {
-      const res = await respondWithStreams(async (userId) => ({
-        streams: await getFollowedStreams(helixClient, userId),
-      }));
-      // Keep the badge honest after a manual refresh, reusing this response
-      // instead of spending another Helix call. Notifications stay on the poll.
-      if (res.ok) {
-        await setLiveBaseline(res.streams);
-        await setBadge(res.streams.length);
-      }
+      const res = await respondWithStreams(loadFollowed);
+      if (res.ok) await commitFollowed(res.streams);
       return res;
     }
     case 'streams/getTop':

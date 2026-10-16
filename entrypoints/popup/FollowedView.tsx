@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { browser } from 'wxt/browser';
+import { browser, type Browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { StreamsMessage, StreamsResponse, StreamView } from '@/lib/streams/types';
 import type { Density } from '@/lib/settings/types';
+import { FOLLOWED_CACHE_KEY, getFollowedCache, type FollowedCache } from '@/lib/streams/cache';
 import StreamCard from './StreamCard';
 import { StreamEmpty, StreamError, StreamList, StreamSkeleton } from './StreamStates';
 
@@ -26,7 +27,7 @@ function FollowedView({ density, onDisconnected }: FollowedViewProps) {
     } satisfies StreamsMessage);
     if (!res.ok) {
       if (res.error === 'not_connected') onDisconnected();
-      else setState({ kind: 'error' });
+      else setState((prev) => (prev.kind === 'loaded' ? prev : { kind: 'error' }));
       return;
     }
     setState(
@@ -41,8 +42,26 @@ function FollowedView({ density, onDisconnected }: FollowedViewProps) {
 
   useEffect(() => {
     void (async () => {
+      const cached = await getFollowedCache();
+      if (cached && cached.streams.length > 0) {
+        setState({ kind: 'loaded', streams: cached.streams });
+      }
       await load();
     })();
+
+    function handleStorageChange(
+      changes: Record<string, Browser.storage.StorageChange>,
+      area: string,
+    ) {
+      if (area !== 'session' || !changes[FOLLOWED_CACHE_KEY]) return;
+      const next = changes[FOLLOWED_CACHE_KEY].newValue as FollowedCache | undefined;
+      if (!next || !Array.isArray(next.streams)) return;
+      setState(
+        next.streams.length === 0 ? { kind: 'empty' } : { kind: 'loaded', streams: next.streams },
+      );
+    }
+    browser.storage.onChanged.addListener(handleStorageChange);
+    return () => browser.storage.onChanged.removeListener(handleStorageChange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
