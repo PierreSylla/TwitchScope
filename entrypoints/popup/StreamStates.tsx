@@ -7,7 +7,6 @@ const LIST_PADDING: Record<Density, string> = {
   comfortable: 'gap-3 p-3',
 };
 
-
 export function StreamList({ density, children }: { density: Density; children: ReactNode }) {
   return (
     <div className={`flex max-h-[480px] flex-col overflow-y-auto ${LIST_PADDING[density]}`}>

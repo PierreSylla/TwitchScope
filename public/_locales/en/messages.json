@@ -160,5 +160,37 @@
         "example": "20"
       }
     }
+  },
+  "settingsNotificationsLabel": {
+    "message": "Notifications",
+    "description": "Section label for the notification settings."
+  },
+  "settingsNotificationsEnable": {
+    "message": "Enable notifications",
+    "description": "Label for the master notifications on/off switch."
+  },
+  "settingsNotificationsFrequency": {
+    "message": "Check frequency",
+    "description": "Label for the control choosing how often followed streams are polled."
+  },
+  "settingsNotificationsEveryMinutes": {
+    "message": "Every $COUNT$ minutes",
+    "description": "An option of the polling frequency control.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "notificationLiveTitle": {
+    "message": "$CHANNEL$ is live",
+    "description": "Title of the system notification shown when a followed channel goes live.",
+    "placeholders": {
+      "channel": {
+        "content": "$1",
+        "example": "NovaPlays"
+      }
+    }
   }
 }

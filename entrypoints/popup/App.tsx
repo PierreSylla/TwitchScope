@@ -2,8 +2,20 @@ import { useEffect, useState } from 'react';
 import { browser, type Browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
-import { getDensity, setDensity } from '@/lib/settings/storage';
-import { DEFAULT_DENSITY, type Density } from '@/lib/settings/types';
+import {
+  DENSITY_KEY,
+  getDensity,
+  getNotificationSettings,
+  NOTIFICATIONS_KEY,
+  setDensity,
+  setNotificationSettings,
+} from '@/lib/settings/storage';
+import {
+  DEFAULT_DENSITY,
+  DEFAULT_NOTIFICATION_SETTINGS,
+  type Density,
+  type NotificationSettings,
+} from '@/lib/settings/types';
 import PopupHeader, { type Tab } from './PopupHeader';
 import PopupSettings from './PopupSettings';
 import FollowedView from './FollowedView';
@@ -16,20 +28,32 @@ function App() {
   const [auth, setAuth] = useState<Auth>('loading');
   const [connecting, setConnecting] = useState(false);
   const [density, setDensityState] = useState<Density>(DEFAULT_DENSITY);
+  const [notifications, setNotificationsState] = useState<NotificationSettings>(
+    DEFAULT_NOTIFICATION_SETTINGS,
+  );
   const [showSettings, setShowSettings] = useState(false);
   const [tab, setTab] = useState<Tab>('followed');
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     getDensity().then(setDensityState);
-    // The popup can stay mounted while its devtools are attached, so a
-    // density change made from the options page needs to apply live too.
+    getNotificationSettings().then(setNotificationsState);
+    // The popup can stay mounted while its devtools are attached, and both of
+    // these settings also exist on the options page, so a change made there
+    // needs to apply live too.
     function handleStorageChange(
       changes: Record<string, Browser.storage.StorageChange>,
       area: string,
     ) {
-      if (area === 'sync' && changes.density) {
-        setDensityState(changes.density.newValue as Density);
+      if (area !== 'sync') return;
+      if (changes[DENSITY_KEY]) {
+        setDensityState(changes[DENSITY_KEY].newValue as Density);
+      }
+      if (changes[NOTIFICATIONS_KEY]) {
+        setNotificationsState({
+          ...DEFAULT_NOTIFICATION_SETTINGS,
+          ...(changes[NOTIFICATIONS_KEY].newValue as Partial<NotificationSettings>),
+        });
       }
     }
     browser.storage.onChanged.addListener(handleStorageChange);
@@ -56,6 +80,11 @@ function App() {
     await setDensity(next);
   }
 
+  async function handleNotificationsChange(next: NotificationSettings) {
+    setNotificationsState(next);
+    await setNotificationSettings(next);
+  }
+
   const panel =
     'w-[380px] overflow-hidden border border-hairline bg-panel text-sm shadow-[0_1px_3px_rgba(0,0,0,.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,.3)]';
 
@@ -64,7 +93,9 @@ function App() {
       <div className={`${panel} rounded-2xl`}>
         <PopupSettings
           density={density}
+          notifications={notifications}
           onDensityChange={handleDensityChange}
+          onNotificationsChange={handleNotificationsChange}
           onBack={() => setShowSettings(false)}
         />
       </div>

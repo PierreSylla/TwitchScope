@@ -2,10 +2,38 @@ import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
-import { getDensity, setDensity } from '@/lib/settings/storage';
-import { DEFAULT_DENSITY, type Density } from '@/lib/settings/types';
+import {
+  getDensity,
+  getNotificationSettings,
+  setDensity,
+  setNotificationSettings,
+} from '@/lib/settings/storage';
+import {
+  DEFAULT_DENSITY,
+  DEFAULT_NOTIFICATION_SETTINGS,
+  POLLING_INTERVAL_OPTIONS,
+  type Density,
+  type NotificationSettings,
+} from '@/lib/settings/types';
+import {
+  IntervalSelect,
+  SegmentedControl,
+  SettingsRow,
+  ToggleSwitch,
+} from '@/components/SettingsControls';
+import { DENSITY_OPTIONS, intervalLabel } from '@/lib/settings/labels';
 
-const DENSITY_OPTIONS = ['compact', 'comfortable'] as const;
+function SectionHeading({
+  messageKey,
+}: {
+  messageKey: 'settingsDensityLabel' | 'settingsNotificationsLabel';
+}) {
+  return (
+    <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+      {browser.i18n.getMessage(messageKey)}
+    </h2>
+  );
+}
 
 function DensitySection() {
   const [density, setDensityState] = useState<Density>(DEFAULT_DENSITY);
@@ -21,26 +49,43 @@ function DensitySection() {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-        {browser.i18n.getMessage('settingsDensityLabel')}
-      </h2>
-      <div className="inline-flex w-fit gap-0.5 rounded-lg border border-hairline bg-tile p-0.5">
-        {DENSITY_OPTIONS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={density === option}
-            onClick={() => handleSelect(option)}
-            className={`rounded-md px-3.5 py-1.5 text-xs font-semibold ${
-              density === option ? 'bg-brand text-white dark:text-[#18181B]' : 'text-ink-muted'
-            }`}
-          >
-            {browser.i18n.getMessage(
-              option === 'compact' ? 'settingsDensityCompact' : 'settingsDensityComfortable',
-            )}
-          </button>
-        ))}
-      </div>
+      <SectionHeading messageKey="settingsDensityLabel" />
+      <SegmentedControl options={DENSITY_OPTIONS} value={density} onChange={handleSelect} />
+    </section>
+  );
+}
+
+function NotificationsSection() {
+  const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
+
+  useEffect(() => {
+    getNotificationSettings().then(setSettings);
+  }, []);
+
+  async function update(next: NotificationSettings) {
+    setSettings(next);
+    await setNotificationSettings(next);
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <SectionHeading messageKey="settingsNotificationsLabel" />
+      <SettingsRow label={browser.i18n.getMessage('settingsNotificationsEnable')}>
+        <ToggleSwitch
+          checked={settings.enabled}
+          label={browser.i18n.getMessage('settingsNotificationsEnable')}
+          onChange={(enabled) => void update({ ...settings, enabled })}
+        />
+      </SettingsRow>
+      <SettingsRow label={browser.i18n.getMessage('settingsNotificationsFrequency')}>
+        <IntervalSelect
+          value={settings.intervalMinutes}
+          options={POLLING_INTERVAL_OPTIONS}
+          label={browser.i18n.getMessage('settingsNotificationsFrequency')}
+          format={intervalLabel}
+          onChange={(intervalMinutes) => void update({ ...settings, intervalMinutes })}
+        />
+      </SettingsRow>
     </section>
   );
 }
@@ -159,6 +204,7 @@ function App() {
       </div>
       <div className="flex flex-col gap-8 p-8">
         <AccountSection />
+        <NotificationsSection />
         <DensitySection />
       </div>
     </div>
