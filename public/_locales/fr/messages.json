@@ -314,5 +314,29 @@
   "filterAllGames": {
     "message": "Tous les jeux",
     "description": "Game filter option that keeps every game."
+  },
+  "cardMenuLabel": {
+    "message": "Actions de la chaîne",
+    "description": "Accessible label of the context menu opened from a stream card."
+  },
+  "cardMenuNewTab": {
+    "message": "Nouvel onglet",
+    "description": "Context-menu item opening the channel page."
+  },
+  "cardMenuPlayerOnly": {
+    "message": "Lecteur uniquement",
+    "description": "Context-menu item opening just the Twitch player."
+  },
+  "cardMenuMultitwitch": {
+    "message": "Regarder sur MultiTwitch",
+    "description": "Context-menu item opening the channel on multitwitch.tv."
+  },
+  "cardMenuChat": {
+    "message": "Chat",
+    "description": "Context-menu item opening the channel chat in its own window."
+  },
+  "cardMenuVideos": {
+    "message": "Vidéos",
+    "description": "Context-menu item opening the channel video list."
   }
 }
