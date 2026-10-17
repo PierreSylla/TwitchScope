@@ -338,5 +338,39 @@
   "cardMenuVideos": {
     "message": "Videos",
     "description": "Context-menu item opening the channel video list."
+  },
+  "cardMenuMute": {
+    "message": "Stop notifying me",
+    "description": "Context-menu item muting notifications for this channel."
+  },
+  "cardMenuUnmute": {
+    "message": "Notify me again",
+    "description": "Context-menu item un-muting notifications for this channel."
+  },
+  "settingsChannelsLabel": {
+    "message": "Channel notifications",
+    "description": "Section label for the per-channel notification list."
+  },
+  "settingsChannelsHint": {
+    "message": "Turn off the channels you do not want notifications for.",
+    "description": "Help text above the per-channel notification list."
+  },
+  "settingsChannelsEmpty": {
+    "message": "You do not follow any channel yet.",
+    "description": "Shown when the followed-channel list comes back empty."
+  },
+  "settingsChannelsError": {
+    "message": "Couldn’t load your followed channels.",
+    "description": "Shown when the followed-channel request fails."
+  },
+  "settingsChannelsMutedCount": {
+    "message": "Notifications off: $COUNT$",
+    "description": "Summary of how many channels have notifications off.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
   }
 }

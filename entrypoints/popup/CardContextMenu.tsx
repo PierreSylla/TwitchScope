@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { CHANNEL_ACTIONS, channelUrl, type ChannelAction } from '@/lib/streams/channelLinks';
+import { getMutedChannels, setChannelMuted } from '@/lib/settings/storage';
 
 const LABEL: Record<ChannelAction, Parameters<typeof browser.i18n.getMessage>[0]> = {
   newTab: 'cardMenuNewTab',
@@ -14,14 +15,27 @@ const MARGIN = 8;
 
 interface CardContextMenuProps {
   login: string;
+  channelId: string;
   x: number;
   y: number;
   onClose: () => void;
 }
 
-function CardContextMenu({ login, x, y, onClose }: CardContextMenuProps) {
+function CardContextMenu({ login, channelId, x, y, onClose }: CardContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ left: x, top: y, ready: false });
+  const [muted, setMuted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    getMutedChannels().then((ids) => setMuted(ids.includes(channelId)));
+  }, [channelId]);
+
+  async function toggleMuted() {
+    const next = !muted;
+    setMuted(next);
+    await setChannelMuted(channelId, next);
+    onClose();
+  }
 
   // Clamp into the popup viewport, flipping up when there is no room below.
   useLayoutEffect(() => {
@@ -55,13 +69,19 @@ function CardContextMenu({ login, x, y, onClose }: CardContextMenuProps) {
     }
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('scroll', onClose, true);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('mousedown', onPointerDown);
-      window.removeEventListener('scroll', onClose, true);
     };
   }, [onClose]);
+
+  // Only once presented: a scroll already in flight when the menu opened would
+  // otherwise close it immediately, since scroll events arrive a frame late.
+  useEffect(() => {
+    if (!position.ready) return;
+    window.addEventListener('scroll', onClose, true);
+    return () => window.removeEventListener('scroll', onClose, true);
+  }, [position.ready, onClose]);
 
   return (
     <div
@@ -87,6 +107,15 @@ function CardContextMenu({ login, x, y, onClose }: CardContextMenuProps) {
           {browser.i18n.getMessage(LABEL[action])}
         </a>
       ))}
+      {muted !== null && (
+        <button
+          type="button"
+          onClick={toggleMuted}
+          className="mt-1 border-t border-hairline px-3 py-1.5 text-left text-[13px] text-ink hover:bg-tile focus-visible:bg-tile focus-visible:outline-none"
+        >
+          {browser.i18n.getMessage(muted ? 'cardMenuUnmute' : 'cardMenuMute')}
+        </button>
+      )}
     </div>
   );
 }

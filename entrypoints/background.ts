@@ -7,6 +7,8 @@ import { createHelixClient, type HelixClient } from '@/lib/helix/client';
 import { HelixAuthError } from '@/lib/helix/types';
 import { getFollowedStreams, getTopStreams, type HelixStream } from '@/lib/helix/streams';
 import { getTopGames } from '@/lib/helix/games';
+import { getFollowedChannels } from '@/lib/helix/channels';
+import type { ChannelsMessage, ChannelsResponse } from '@/lib/channels/types';
 import { searchCategories, searchChannels } from '@/lib/helix/search';
 import { getStreamsByUserIds } from '@/lib/helix/streams';
 import { channelId, toCategoryResults, toChannelResults } from '@/lib/search/mapper';
@@ -24,7 +26,11 @@ import {
 import { loginFromNotificationId, notificationIdFor } from '@/lib/streams/notifications';
 import { clearFollowedCache, setFollowedCache } from '@/lib/streams/cache';
 import type { StreamView, StreamsMessage, StreamsResponse } from '@/lib/streams/types';
-import { getNotificationSettings, NOTIFICATIONS_KEY } from '@/lib/settings/storage';
+import {
+  getMutedChannels,
+  getNotificationSettings,
+  NOTIFICATIONS_KEY,
+} from '@/lib/settings/storage';
 
 const TOKEN_VALIDATION_ALARM = 'auth-token-validate';
 const POLL_ALARM = 'followed-streams-poll';
@@ -38,6 +44,7 @@ const helixClient: HelixClient = createHelixClient({
 const TOP_STREAMS_PAGE_SIZE = 20;
 const TOP_GAMES_PAGE_SIZE = 20;
 const SEARCH_PAGE_SIZE = 20;
+const FOLLOWED_CHANNELS_PAGE_SIZE = 100;
 
 interface StreamsPage {
   streams: HelixStream[];
@@ -93,7 +100,10 @@ async function pollFollowedStreams(notify: boolean) {
 
   if (notify && (await getNotificationSettings()).enabled) {
     const baseline = await getLiveBaseline();
-    for (const stream of newlyLive(baseline, res.streams)) notifyLive(stream);
+    const muted = new Set(await getMutedChannels());
+    for (const stream of newlyLive(baseline, res.streams)) {
+      if (!muted.has(stream.userId)) notifyLive(stream);
+    }
   }
 
   await commitFollowed(res.streams);
@@ -139,8 +149,33 @@ async function respondWithSearch(query: string, liveOnly: boolean): Promise<Sear
   }
 }
 
-type AppMessage = AuthMessage | StreamsMessage | GamesMessage | SearchMessage;
-type AppResponse = AuthResponse | StreamsResponse | GamesResponse | SearchResponse;
+async function respondWithFollowedChannels(cursor?: string): Promise<ChannelsResponse> {
+  const session = await getSession();
+  if (!session) return { ok: false, error: 'not_connected' };
+  try {
+    const { channels, cursor: next } = await getFollowedChannels(helixClient, {
+      userId: session.userId,
+      first: FOLLOWED_CHANNELS_PAGE_SIZE,
+      after: cursor,
+    });
+    return {
+      ok: true,
+      channels: channels.map((c) => ({
+        id: c.broadcaster_id,
+        login: c.broadcaster_login,
+        name: c.broadcaster_name,
+      })),
+      cursor: next,
+    };
+  } catch (err) {
+    if (err instanceof HelixAuthError) return { ok: false, error: 'not_connected' };
+    return { ok: false, error: 'fetch_failed' };
+  }
+}
+
+type AppMessage = AuthMessage | StreamsMessage | GamesMessage | SearchMessage | ChannelsMessage;
+type AppResponse =
+  AuthResponse | StreamsResponse | GamesResponse | SearchResponse | ChannelsResponse;
 
 async function handleMessage(message: AppMessage): Promise<AppResponse> {
   switch (message.type) {
@@ -179,6 +214,8 @@ async function handleMessage(message: AppMessage): Promise<AppResponse> {
       return respondWithTopGames(message.cursor);
     case 'search/run':
       return respondWithSearch(message.query, message.liveOnly);
+    case 'channels/getFollowed':
+      return respondWithFollowedChannels(message.cursor);
   }
 }
 

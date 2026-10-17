@@ -5,6 +5,7 @@ import type { StreamView } from './types';
 function stream(partial: Partial<StreamView> & { login: string }): StreamView {
   return {
     id: `s-${partial.login}`,
+    userId: `u-${partial.login}`,
     channel: partial.login,
     game: 'Game',
     title: 'Title',

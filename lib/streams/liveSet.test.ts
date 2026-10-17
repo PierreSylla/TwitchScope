@@ -5,6 +5,7 @@ import type { StreamView } from './types';
 function stream(login: string, id = `stream-${login}`): StreamView {
   return {
     id,
+    userId: `u-${login}`,
     channel: login.toUpperCase(),
     login,
     game: 'Game',

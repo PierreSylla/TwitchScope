@@ -4,12 +4,15 @@ import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
 import {
   getDensity,
+  getMutedChannels,
   getNotificationSettings,
   getTheme,
+  setChannelMuted,
   setDensity,
   setNotificationSettings,
   setTheme,
 } from '@/lib/settings/storage';
+import type { ChannelsMessage, ChannelsResponse, FollowedChannelView } from '@/lib/channels/types';
 import {
   DEFAULT_DENSITY,
   DEFAULT_NOTIFICATION_SETTINGS,
@@ -31,7 +34,11 @@ import { DENSITY_OPTIONS, intervalLabel, THEME_OPTIONS } from '@/lib/settings/la
 function SectionHeading({
   messageKey,
 }: {
-  messageKey: 'settingsDensityLabel' | 'settingsNotificationsLabel' | 'settingsThemeLabel';
+  messageKey:
+    | 'settingsDensityLabel'
+    | 'settingsNotificationsLabel'
+    | 'settingsThemeLabel'
+    | 'settingsChannelsLabel';
 }) {
   return (
     <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
@@ -56,6 +63,102 @@ function DensitySection() {
     <section className="flex flex-col gap-3">
       <SectionHeading messageKey="settingsDensityLabel" />
       <SegmentedControl options={DENSITY_OPTIONS} value={density} onChange={handleSelect} />
+    </section>
+  );
+}
+
+type ChannelsState =
+  | { kind: 'loading' }
+  | { kind: 'error' }
+  | { kind: 'loaded'; channels: FollowedChannelView[]; cursor?: string; loadingMore: boolean };
+
+function ChannelNotificationsSection() {
+  const [state, setState] = useState<ChannelsState>({ kind: 'loading' });
+  const [muted, setMuted] = useState<string[]>([]);
+
+  useEffect(() => {
+    getMutedChannels().then(setMuted);
+    void (async () => {
+      const res = await sendMessage<ChannelsResponse>({
+        type: 'channels/getFollowed',
+      } satisfies ChannelsMessage);
+      setState(
+        res.ok
+          ? { kind: 'loaded', channels: res.channels, cursor: res.cursor, loadingMore: false }
+          : { kind: 'error' },
+      );
+    })();
+  }, []);
+
+  async function loadMore() {
+    if (state.kind !== 'loaded' || !state.cursor || state.loadingMore) return;
+    const cursor = state.cursor;
+    setState({ ...state, loadingMore: true });
+    const res = await sendMessage<ChannelsResponse>({
+      type: 'channels/getFollowed',
+      cursor,
+    } satisfies ChannelsMessage);
+    setState((prev) => {
+      if (prev.kind !== 'loaded') return prev;
+      if (!res.ok) return { ...prev, loadingMore: false };
+      const seen = new Set(prev.channels.map((c) => c.id));
+      return {
+        kind: 'loaded',
+        channels: [...prev.channels, ...res.channels.filter((c) => !seen.has(c.id))],
+        cursor: res.cursor,
+        loadingMore: false,
+      };
+    });
+  }
+
+  async function toggle(channelId: string, notify: boolean) {
+    setMuted(await setChannelMuted(channelId, !notify));
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <SectionHeading messageKey="settingsChannelsLabel" />
+      <p className="text-xs text-ink-muted">
+        {browser.i18n.getMessage('settingsChannelsHint')}
+        {muted.length > 0 &&
+          ` — ${browser.i18n.getMessage('settingsChannelsMutedCount', [String(muted.length)])}`}
+      </p>
+
+      {state.kind === 'loading' && (
+        <p className="text-sm text-ink-muted">{browser.i18n.getMessage('authLoading')}</p>
+      )}
+      {state.kind === 'error' && (
+        <p className="text-sm text-ink-muted">{browser.i18n.getMessage('settingsChannelsError')}</p>
+      )}
+      {state.kind === 'loaded' && state.channels.length === 0 && (
+        <p className="text-sm text-ink-muted">{browser.i18n.getMessage('settingsChannelsEmpty')}</p>
+      )}
+
+      {state.kind === 'loaded' && state.channels.length > 0 && (
+        <div className="flex max-h-[320px] flex-col divide-y divide-hairline overflow-y-auto rounded-xl border border-hairline">
+          {state.channels.map((channel) => (
+            <div key={channel.id} className="px-3 py-2">
+              <SettingsRow label={channel.name}>
+                <ToggleSwitch
+                  checked={!muted.includes(channel.id)}
+                  label={channel.name}
+                  onChange={(notify) => void toggle(channel.id, notify)}
+                />
+              </SettingsRow>
+            </div>
+          ))}
+          {state.cursor && (
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={state.loadingMore}
+              className="px-3 py-2 text-center text-[13px] font-semibold text-brand disabled:opacity-50"
+            >
+              {browser.i18n.getMessage(state.loadingMore ? 'authLoading' : 'loadMoreButton')}
+            </button>
+          )}
+        </div>
+      )}
     </section>
   );
 }
@@ -231,6 +334,7 @@ function App() {
       <div className="flex flex-col gap-8 p-8">
         <AccountSection />
         <NotificationsSection />
+        <ChannelNotificationsSection />
         <ThemeSection />
         <DensitySection />
       </div>

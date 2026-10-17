@@ -1,5 +1,6 @@
 export interface StreamView {
   id: string;
+  userId: string;
   channel: string;
   login: string;
   game: string;

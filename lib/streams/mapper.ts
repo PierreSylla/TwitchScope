@@ -18,6 +18,7 @@ export function toStreamViews(
   return streams
     .map((s) => ({
       id: s.id,
+      userId: s.user_id,
       channel: s.user_name,
       login: s.user_login,
       game: s.game_name,

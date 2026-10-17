@@ -11,6 +11,7 @@ import {
 export const DENSITY_KEY = 'density';
 export const THEME_KEY = 'theme';
 export const NOTIFICATIONS_KEY = 'notifications';
+export const MUTED_CHANNELS_KEY = 'mutedChannels';
 
 export async function getDensity(): Promise<Density> {
   const result = await browser.storage.sync.get(DENSITY_KEY);
@@ -38,4 +39,19 @@ export async function getNotificationSettings(): Promise<NotificationSettings> {
 
 export async function setNotificationSettings(next: NotificationSettings): Promise<void> {
   await browser.storage.sync.set({ [NOTIFICATIONS_KEY]: next });
+}
+
+export async function getMutedChannels(): Promise<string[]> {
+  const result = await browser.storage.sync.get(MUTED_CHANNELS_KEY);
+  const stored = result[MUTED_CHANNELS_KEY];
+  return Array.isArray(stored) ? (stored as string[]) : [];
+}
+
+export async function setChannelMuted(channelId: string, muted: boolean): Promise<string[]> {
+  const current = new Set(await getMutedChannels());
+  if (muted) current.add(channelId);
+  else current.delete(channelId);
+  const next = [...current];
+  await browser.storage.sync.set({ [MUTED_CHANNELS_KEY]: next });
+  return next;
 }

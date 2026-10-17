@@ -30,6 +30,7 @@ function StreamCard({ stream, density }: StreamCardProps) {
   const menu = menuAt && (
     <CardContextMenu
       login={stream.login}
+      channelId={stream.userId}
       x={menuAt.x}
       y={menuAt.y}
       onClose={() => setMenuAt(null)}
