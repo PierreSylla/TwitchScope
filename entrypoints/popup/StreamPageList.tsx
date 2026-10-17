@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { StreamsResponse, StreamView } from '@/lib/streams/types';
 import type { Density } from '@/lib/settings/types';
 import StreamCard from './StreamCard';
@@ -13,6 +13,7 @@ type State =
 
 interface StreamPageListProps {
   density: Density;
+  header?: ReactNode;
   errorMessage: string;
   emptyMessage: string;
   announce: (count: number) => string;
@@ -28,6 +29,7 @@ function appendUnique(current: StreamView[], next: StreamView[]): StreamView[] {
 
 function StreamPageList({
   density,
+  header,
   errorMessage,
   emptyMessage,
   announce,
@@ -96,7 +98,7 @@ function StreamPageList({
       {state.kind === 'empty' && <StreamEmpty message={emptyMessage} />}
 
       {state.kind === 'loaded' && (
-        <StreamList density={density}>
+        <StreamList density={density} header={header}>
           {state.streams.map((stream) => (
             <StreamCard key={stream.id} stream={stream} density={density} />
           ))}

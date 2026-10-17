@@ -7,9 +7,18 @@
   --color-hairline: #e4e4e7;
 }
 
+/* color-scheme makes the browser paint scrollbars and native controls to match
+   the panel instead of defaulting to light. */
+:root {
+  color-scheme: light;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) var(--color-panel);
+}
+
 /* No data-theme means "auto": follow the system. An explicit light choice opts out. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
+    color-scheme: dark;
     --color-brand: #a78bfa;
     --color-ink: #f4f4f5;
     --color-ink-muted: #a1a1aa;
@@ -20,10 +29,26 @@
 }
 
 :root[data-theme='dark'] {
+  color-scheme: dark;
   --color-brand: #a78bfa;
   --color-ink: #f4f4f5;
   --color-ink-muted: #a1a1aa;
   --color-panel: #0e0e10;
   --color-tile: #1c1c21;
   --color-hairline: #2c2c33;
+}
+
+/* Chrome below 121 ignores scrollbar-color, so style its scrollbar directly. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-panel);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: 999px;
 }

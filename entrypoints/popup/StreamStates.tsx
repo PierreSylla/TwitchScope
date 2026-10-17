@@ -18,7 +18,7 @@ export function StreamList({
 }) {
   if (!header) {
     return (
-      <div className={`flex max-h-[480px] flex-col overflow-y-auto ${LIST_PADDING[density]}`}>
+      <div className={`flex h-[480px] flex-col overflow-y-auto ${LIST_PADDING[density]}`}>
         {children}
       </div>
     );
@@ -26,7 +26,7 @@ export function StreamList({
   // The frame owns the cap so the pinned header eats into the list rather than
   // adding to the popup's height; min-h-0 is what lets the list actually shrink.
   return (
-    <div className="flex max-h-[480px] flex-col">
+    <div className="flex h-[480px] flex-col">
       {header}
       <div className={`flex min-h-0 flex-1 flex-col overflow-y-auto ${LIST_PADDING[density]}`}>
         {children}

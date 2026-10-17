@@ -96,7 +96,7 @@ function BrowseView({ density, onDisconnected }: BrowseViewProps) {
       {state.kind === 'empty' && <StreamEmpty message={t('browseEmpty')} />}
 
       {state.kind === 'loaded' && (
-        <div className="grid max-h-[480px] grid-cols-2 gap-3 overflow-y-auto p-3">
+        <div className="grid h-[480px] auto-rows-min grid-cols-2 gap-3 overflow-y-auto p-3">
           {state.games.map((game) => (
             <button
               key={game.id}

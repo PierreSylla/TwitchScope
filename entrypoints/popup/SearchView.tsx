@@ -85,7 +85,7 @@ function SearchView({ density, onDisconnected }: SearchViewProps) {
   const locale = currentLocale();
 
   return (
-    <div className="flex max-h-[480px] flex-col gap-4 overflow-y-auto p-3">
+    <div className="flex h-[480px] flex-col gap-4 overflow-y-auto p-3">
       <input
         type="search"
         value={query}
