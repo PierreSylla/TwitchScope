@@ -8,6 +8,10 @@ export type Theme = 'auto' | 'light' | 'dark';
 
 export const DEFAULT_THEME: Theme = 'auto';
 
+export type Language = 'auto' | 'en' | 'fr';
+
+export const DEFAULT_LANGUAGE: Language = 'auto';
+
 export interface NotificationSettings {
   enabled: boolean;
   intervalMinutes: number;

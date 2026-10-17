@@ -1,5 +1,5 @@
-import { browser } from 'wxt/browser';
 import type { Density } from '@/lib/settings/types';
+import { t } from '@/lib/i18n/messages';
 
 export type Tab = 'followed' | 'popular' | 'browse' | 'search';
 
@@ -52,7 +52,7 @@ function PopupHeader({
             <button
               type="button"
               onClick={onRefresh}
-              aria-label={browser.i18n.getMessage('refreshButton')}
+              aria-label={t('refreshButton')}
               className={`flex items-center justify-center rounded-lg text-ink-muted hover:bg-tile ${compact ? 'h-5 w-5 text-xs' : 'h-6 w-6 text-sm'}`}
             >
               ⟳
@@ -60,7 +60,7 @@ function PopupHeader({
             <button
               type="button"
               onClick={onSettings}
-              aria-label={browser.i18n.getMessage('settingsButton')}
+              aria-label={t('settingsButton')}
               className={`flex items-center justify-center rounded-lg text-ink-muted hover:bg-tile ${compact ? 'h-5 w-5 text-xs' : 'h-6 w-6 text-sm'}`}
             >
               ⚙
@@ -82,7 +82,7 @@ function PopupHeader({
                 id === activeTab ? 'border-brand text-brand' : 'border-transparent text-ink-muted'
               }`}
             >
-              {browser.i18n.getMessage(key)}
+              {t(key)}
             </button>
           ))}
         </nav>

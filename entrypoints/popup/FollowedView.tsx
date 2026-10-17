@@ -15,6 +15,7 @@ import {
 } from '@/lib/streams/sort';
 import StreamCard from './StreamCard';
 import { StreamEmpty, StreamError, StreamList, StreamSkeleton } from './StreamStates';
+import { currentLocale, t, tCount } from '@/lib/i18n/messages';
 
 const SORT_MESSAGE: Record<SortKey, 'sortViewers' | 'sortName' | 'sortGame' | 'sortDuration'> = {
   viewers: 'sortViewers',
@@ -86,30 +87,25 @@ function FollowedView({ density, onDisconnected }: FollowedViewProps) {
   return (
     <>
       <p className="sr-only" aria-live="polite">
-        {state.kind === 'loading' && browser.i18n.getMessage('authLoading')}
-        {state.kind === 'error' && browser.i18n.getMessage('followedError')}
-        {state.kind === 'empty' && browser.i18n.getMessage('followedEmpty')}
-        {state.kind === 'loaded' &&
-          browser.i18n.getMessage('followedLoadedAnnouncement', [String(state.streams.length)])}
+        {state.kind === 'loading' && t('authLoading')}
+        {state.kind === 'error' && t('followedError')}
+        {state.kind === 'empty' && t('followedEmpty')}
+        {state.kind === 'loaded' && tCount('followedLoadedAnnouncement', state.streams.length)}
       </p>
 
       {state.kind === 'loading' && <StreamSkeleton density={density} />}
 
-      {state.kind === 'error' && (
-        <StreamError message={browser.i18n.getMessage('followedError')} onRetry={retry} />
-      )}
+      {state.kind === 'error' && <StreamError message={t('followedError')} onRetry={retry} />}
 
       {state.kind === 'empty' && (
-        <StreamEmpty message={browser.i18n.getMessage('followedEmpty')}>
-          <span className="text-[13px] font-semibold text-brand">
-            {browser.i18n.getMessage('followedEmptyCta')}
-          </span>
+        <StreamEmpty message={t('followedEmpty')}>
+          <span className="text-[13px] font-semibold text-brand">{t('followedEmptyCta')}</span>
         </StreamEmpty>
       )}
 
       {state.kind === 'loaded' &&
         (() => {
-          const locale = browser.i18n.getUILanguage();
+          const locale = currentLocale();
           const games = gameOptions(state.streams, locale);
           // A game can disappear between renders when its streams end.
           const activeGame = games.includes(game) ? game : ALL_GAMES;
@@ -117,24 +113,24 @@ function FollowedView({ density, onDisconnected }: FollowedViewProps) {
           const controls = (
             <div className="flex flex-none items-center gap-2 border-b border-hairline px-3 py-2">
               <select
-                aria-label={browser.i18n.getMessage('sortLabel')}
+                aria-label={t('sortLabel')}
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortKey)}
                 className="min-w-0 flex-1 rounded-md border border-hairline bg-panel px-2 py-1 text-xs text-ink"
               >
                 {SORT_KEYS.map((key) => (
                   <option key={key} value={key}>
-                    {browser.i18n.getMessage(SORT_MESSAGE[key])}
+                    {t(SORT_MESSAGE[key])}
                   </option>
                 ))}
               </select>
               <select
-                aria-label={browser.i18n.getMessage('filterGameLabel')}
+                aria-label={t('filterGameLabel')}
                 value={activeGame}
                 onChange={(event) => setGame(event.target.value)}
                 className="min-w-0 flex-1 rounded-md border border-hairline bg-panel px-2 py-1 text-xs text-ink"
               >
-                <option value={ALL_GAMES}>{browser.i18n.getMessage('filterAllGames')}</option>
+                <option value={ALL_GAMES}>{t('filterAllGames')}</option>
                 {games.map((option) => (
                   <option key={option} value={option}>
                     {option}

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type {
   CategoryResult,
@@ -12,6 +11,7 @@ import { formatViewerCount } from '@/lib/streams/format';
 import { ToggleSwitch } from '@/components/SettingsControls';
 import GameStreams from './GameStreams';
 import { StreamEmpty, StreamError } from './StreamStates';
+import { currentLocale, t, tCount } from '@/lib/i18n/messages';
 
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
@@ -82,7 +82,7 @@ function SearchView({ density, onDisconnected }: SearchViewProps) {
   const results = fresh && state.kind === 'results' ? state : null;
   const failed = fresh && state.kind === 'error';
   const resultCount = results ? results.channels.length + results.categories.length : 0;
-  const locale = browser.i18n.getUILanguage();
+  const locale = currentLocale();
 
   return (
     <div className="flex max-h-[480px] flex-col gap-4 overflow-y-auto p-3">
@@ -90,42 +90,33 @@ function SearchView({ density, onDisconnected }: SearchViewProps) {
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder={browser.i18n.getMessage('searchPlaceholder')}
-        aria-label={browser.i18n.getMessage('searchPlaceholder')}
+        placeholder={t('searchPlaceholder')}
+        aria-label={t('searchPlaceholder')}
         className="flex-none rounded-lg border border-hairline bg-panel px-3 py-[9px] text-[13px] text-ink placeholder:text-ink-muted focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-brand"
       />
 
       <p className="sr-only" aria-live="polite">
-        {!tooShort && !fresh && browser.i18n.getMessage('authLoading')}
-        {failed && browser.i18n.getMessage('searchError')}
-        {results && browser.i18n.getMessage('searchResultsAnnouncement', [String(resultCount)])}
+        {!tooShort && !fresh && t('authLoading')}
+        {failed && t('searchError')}
+        {results && tCount('searchResultsAnnouncement', resultCount)}
       </p>
 
       {failed && (
-        <StreamError
-          message={browser.i18n.getMessage('searchError')}
-          onRetry={() => setState({ kind: 'idle' })}
-        />
+        <StreamError message={t('searchError')} onRetry={() => setState({ kind: 'idle' })} />
       )}
 
-      {results && resultCount === 0 && (
-        <StreamEmpty message={browser.i18n.getMessage('searchNoResults')} />
-      )}
+      {results && resultCount === 0 && <StreamEmpty message={t('searchNoResults')} />}
 
       {!tooShort && !failed && (
         <section className="flex flex-none flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-semibold text-ink">
-              {browser.i18n.getMessage('searchSectionChannels')}
-            </span>
+            <span className="text-[13px] font-semibold text-ink">{t('searchSectionChannels')}</span>
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-ink-muted">
-                {browser.i18n.getMessage('searchLiveOnly')}
-              </span>
+              <span className="text-[11px] text-ink-muted">{t('searchLiveOnly')}</span>
               <ToggleSwitch
                 checked={liveOnly}
                 size="sm"
-                label={browser.i18n.getMessage('searchLiveOnly')}
+                label={t('searchLiveOnly')}
                 onChange={setLiveOnly}
               />
             </div>
@@ -157,9 +148,7 @@ function SearchView({ density, onDisconnected }: SearchViewProps) {
                     : formatViewerCount(channel.viewerCount, locale)}
                 </span>
               ) : (
-                <span className="flex-none text-[11px] text-ink-muted">
-                  {browser.i18n.getMessage('searchOffline')}
-                </span>
+                <span className="flex-none text-[11px] text-ink-muted">{t('searchOffline')}</span>
               )}
             </a>
           ))}
@@ -168,9 +157,7 @@ function SearchView({ density, onDisconnected }: SearchViewProps) {
 
       {results && results.categories.length > 0 && (
         <section className="flex flex-none flex-col gap-2">
-          <span className="text-[13px] font-semibold text-ink">
-            {browser.i18n.getMessage('searchSectionCategories')}
-          </span>
+          <span className="text-[13px] font-semibold text-ink">{t('searchSectionCategories')}</span>
           {results.categories.map((category) => (
             <button
               key={category.id}

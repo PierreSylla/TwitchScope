@@ -67,13 +67,23 @@
     "message": "LIVE",
     "description": "Badge shown on a stream thumbnail that is currently live."
   },
-  "streamViewers": {
-    "message": "$COUNT$ viewers",
-    "description": "Viewer count shown on a stream card.",
+  "streamViewers_one": {
+    "message": "$COUNT$ viewer",
+    "description": "Viewer count shown on a stream card. Singular form.",
     "placeholders": {
       "count": {
         "content": "$1",
-        "example": "1,234"
+        "example": "5"
+      }
+    }
+  },
+  "streamViewers_other": {
+    "message": "$COUNT$ viewers",
+    "description": "Viewer count shown on a stream card. Plural form.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
       }
     }
   },
@@ -97,9 +107,19 @@
     "message": "Couldn't load your followed channels.",
     "description": "Shown on the Followed screen when the streams request fails."
   },
-  "followedLoadedAnnouncement": {
+  "followedLoadedAnnouncement_one": {
+    "message": "$COUNT$ channel live",
+    "description": "Screen-reader announcement when the followed streams list finishes loading. Singular form.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "followedLoadedAnnouncement_other": {
     "message": "$COUNT$ channels live",
-    "description": "Screen-reader announcement when the followed streams list finishes loading.",
+    "description": "Screen-reader announcement when the followed streams list finishes loading. Plural form.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -151,13 +171,23 @@
     "message": "No streams are live right now.",
     "description": "Shown on the Popular screen when Twitch returns no streams."
   },
-  "popularLoadedAnnouncement": {
-    "message": "$COUNT$ popular streams",
-    "description": "Screen-reader announcement when the popular streams list finishes loading.",
+  "popularLoadedAnnouncement_one": {
+    "message": "$COUNT$ popular stream",
+    "description": "Screen-reader announcement when the popular streams list finishes loading. Singular form.",
     "placeholders": {
       "count": {
         "content": "$1",
-        "example": "20"
+        "example": "5"
+      }
+    }
+  },
+  "popularLoadedAnnouncement_other": {
+    "message": "$COUNT$ popular streams",
+    "description": "Screen-reader announcement when the popular streams list finishes loading. Plural form.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
       }
     }
   },
@@ -217,13 +247,23 @@
     "message": "No games to show.",
     "description": "Shown on the Browse screen when Twitch returns no games."
   },
-  "browseLoadedAnnouncement": {
-    "message": "$COUNT$ games",
-    "description": "Screen-reader announcement when the games grid finishes loading.",
+  "browseLoadedAnnouncement_one": {
+    "message": "$COUNT$ game",
+    "description": "Screen-reader announcement when the games grid finishes loading. Singular form.",
     "placeholders": {
       "count": {
         "content": "$1",
-        "example": "20"
+        "example": "5"
+      }
+    }
+  },
+  "browseLoadedAnnouncement_other": {
+    "message": "$COUNT$ games",
+    "description": "Screen-reader announcement when the games grid finishes loading. Plural form.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
       }
     }
   },
@@ -239,13 +279,23 @@
     "message": "Nobody is live in this category.",
     "description": "Shown when a game has no live streams."
   },
-  "gameStreamsLoadedAnnouncement": {
-    "message": "$COUNT$ streams",
-    "description": "Screen-reader announcement when a game’s stream list finishes loading.",
+  "gameStreamsLoadedAnnouncement_one": {
+    "message": "$COUNT$ stream",
+    "description": "Screen-reader announcement when a game’s stream list finishes loading. Singular form.",
     "placeholders": {
       "count": {
         "content": "$1",
-        "example": "20"
+        "example": "5"
+      }
+    }
+  },
+  "gameStreamsLoadedAnnouncement_other": {
+    "message": "$COUNT$ streams",
+    "description": "Screen-reader announcement when a game’s stream list finishes loading. Plural form.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
       }
     }
   },
@@ -277,13 +327,23 @@
     "message": "No channel or game matches that.",
     "description": "Shown when a search returns nothing."
   },
-  "searchResultsAnnouncement": {
-    "message": "$COUNT$ results",
-    "description": "Screen-reader announcement when search results arrive.",
+  "searchResultsAnnouncement_one": {
+    "message": "$COUNT$ result",
+    "description": "Screen-reader announcement when search results arrive. Singular form.",
     "placeholders": {
       "count": {
         "content": "$1",
-        "example": "12"
+        "example": "5"
+      }
+    }
+  },
+  "searchResultsAnnouncement_other": {
+    "message": "$COUNT$ results",
+    "description": "Screen-reader announcement when search results arrive. Plural form.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
       }
     }
   },
@@ -372,5 +432,17 @@
         "example": "3"
       }
     }
+  },
+  "settingsLanguageLabel": {
+    "message": "Language",
+    "description": "Section label for the interface language setting."
+  },
+  "settingsLanguageRow": {
+    "message": "Interface language",
+    "description": "Label of the language select row."
+  },
+  "settingsLanguageAuto": {
+    "message": "Auto",
+    "description": "Language option following the browser language."
   }
 }

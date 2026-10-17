@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
-import { browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { AuthMessage, AuthResponse } from '@/lib/auth/types';
 import {
   getDensity,
+  getLanguage,
   getMutedChannels,
   getNotificationSettings,
   getTheme,
   setChannelMuted,
   setDensity,
+  setLanguage,
   setNotificationSettings,
   setTheme,
 } from '@/lib/settings/storage';
 import type { ChannelsMessage, ChannelsResponse, FollowedChannelView } from '@/lib/channels/types';
 import {
   DEFAULT_DENSITY,
+  DEFAULT_LANGUAGE,
   DEFAULT_NOTIFICATION_SETTINGS,
   DEFAULT_THEME,
   POLLING_INTERVAL_OPTIONS,
   type Density,
+  type Language,
   type NotificationSettings,
   type Theme,
 } from '@/lib/settings/types';
@@ -29,7 +32,15 @@ import {
   SettingsRow,
   ToggleSwitch,
 } from '@/components/SettingsControls';
-import { DENSITY_OPTIONS, intervalLabel, THEME_OPTIONS } from '@/lib/settings/labels';
+import {
+  densityOptions,
+  intervalLabel,
+  languageOptions,
+  themeOptions,
+} from '@/lib/settings/labels';
+import { localeFor } from '@/lib/i18n/apply';
+import { setLocale } from '@/lib/i18n/messages';
+import { t } from '@/lib/i18n/messages';
 
 function SectionHeading({
   messageKey,
@@ -38,11 +49,12 @@ function SectionHeading({
     | 'settingsDensityLabel'
     | 'settingsNotificationsLabel'
     | 'settingsThemeLabel'
-    | 'settingsChannelsLabel';
+    | 'settingsChannelsLabel'
+    | 'settingsLanguageLabel';
 }) {
   return (
     <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-      {browser.i18n.getMessage(messageKey)}
+      {t(messageKey)}
     </h2>
   );
 }
@@ -62,7 +74,7 @@ function DensitySection() {
   return (
     <section className="flex flex-col gap-3">
       <SectionHeading messageKey="settingsDensityLabel" />
-      <SegmentedControl options={DENSITY_OPTIONS} value={density} onChange={handleSelect} />
+      <SegmentedControl options={densityOptions()} value={density} onChange={handleSelect} />
     </section>
   );
 }
@@ -119,19 +131,16 @@ function ChannelNotificationsSection() {
     <section className="flex flex-col gap-3">
       <SectionHeading messageKey="settingsChannelsLabel" />
       <p className="text-xs text-ink-muted">
-        {browser.i18n.getMessage('settingsChannelsHint')}
-        {muted.length > 0 &&
-          ` — ${browser.i18n.getMessage('settingsChannelsMutedCount', [String(muted.length)])}`}
+        {t('settingsChannelsHint')}
+        {muted.length > 0 && ` — ${t('settingsChannelsMutedCount', [String(muted.length)])}`}
       </p>
 
-      {state.kind === 'loading' && (
-        <p className="text-sm text-ink-muted">{browser.i18n.getMessage('authLoading')}</p>
-      )}
+      {state.kind === 'loading' && <p className="text-sm text-ink-muted">{t('authLoading')}</p>}
       {state.kind === 'error' && (
-        <p className="text-sm text-ink-muted">{browser.i18n.getMessage('settingsChannelsError')}</p>
+        <p className="text-sm text-ink-muted">{t('settingsChannelsError')}</p>
       )}
       {state.kind === 'loaded' && state.channels.length === 0 && (
-        <p className="text-sm text-ink-muted">{browser.i18n.getMessage('settingsChannelsEmpty')}</p>
+        <p className="text-sm text-ink-muted">{t('settingsChannelsEmpty')}</p>
       )}
 
       {state.kind === 'loaded' && state.channels.length > 0 && (
@@ -154,7 +163,7 @@ function ChannelNotificationsSection() {
               disabled={state.loadingMore}
               className="px-3 py-2 text-center text-[13px] font-semibold text-brand disabled:opacity-50"
             >
-              {browser.i18n.getMessage(state.loadingMore ? 'authLoading' : 'loadMoreButton')}
+              {t(state.loadingMore ? 'authLoading' : 'loadMoreButton')}
             </button>
           )}
         </div>
@@ -179,7 +188,7 @@ function ThemeSection() {
   return (
     <section className="flex flex-col gap-3">
       <SectionHeading messageKey="settingsThemeLabel" />
-      <SegmentedControl options={THEME_OPTIONS} value={theme} onChange={handleSelect} />
+      <SegmentedControl options={themeOptions()} value={theme} onChange={handleSelect} />
     </section>
   );
 }
@@ -199,18 +208,18 @@ function NotificationsSection() {
   return (
     <section className="flex flex-col gap-3">
       <SectionHeading messageKey="settingsNotificationsLabel" />
-      <SettingsRow label={browser.i18n.getMessage('settingsNotificationsEnable')}>
+      <SettingsRow label={t('settingsNotificationsEnable')}>
         <ToggleSwitch
           checked={settings.enabled}
-          label={browser.i18n.getMessage('settingsNotificationsEnable')}
+          label={t('settingsNotificationsEnable')}
           onChange={(enabled) => void update({ ...settings, enabled })}
         />
       </SettingsRow>
-      <SettingsRow label={browser.i18n.getMessage('settingsNotificationsFrequency')}>
+      <SettingsRow label={t('settingsNotificationsFrequency')}>
         <IntervalSelect
           value={settings.intervalMinutes}
           options={POLLING_INTERVAL_OPTIONS}
-          label={browser.i18n.getMessage('settingsNotificationsFrequency')}
+          label={t('settingsNotificationsFrequency')}
           format={intervalLabel}
           onChange={(intervalMinutes) => void update({ ...settings, intervalMinutes })}
         />
@@ -273,12 +282,10 @@ function AccountSection() {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-        {browser.i18n.getMessage('settingsAccountLabel')}
+        {t('settingsAccountLabel')}
       </h2>
 
-      {state.kind === 'loading' && (
-        <p className="text-sm text-ink-muted">{browser.i18n.getMessage('authLoading')}</p>
-      )}
+      {state.kind === 'loading' && <p className="text-sm text-ink-muted">{t('authLoading')}</p>}
 
       {state.kind === 'connected' && (
         <div className="flex items-center justify-between rounded-xl border border-hairline bg-tile p-3">
@@ -288,9 +295,7 @@ function AccountSection() {
             </span>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-ink">{state.login}</span>
-              <span className="text-xs text-ink-muted">
-                {browser.i18n.getMessage('settingsConnectedWith')}
-              </span>
+              <span className="text-xs text-ink-muted">{t('settingsConnectedWith')}</span>
             </div>
           </div>
           <button
@@ -299,23 +304,21 @@ function AccountSection() {
             onClick={handleDisconnect}
             className="rounded-lg border border-hairline px-4 py-2 text-sm font-semibold text-ink disabled:opacity-50"
           >
-            {browser.i18n.getMessage(pending ? 'authDisconnectingButton' : 'authDisconnectButton')}
+            {t(pending ? 'authDisconnectingButton' : 'authDisconnectButton')}
           </button>
         </div>
       )}
 
       {state.kind === 'disconnected' && (
         <div className="flex items-center justify-between rounded-xl border border-hairline bg-tile p-3">
-          <span className="text-sm text-ink-muted">
-            {browser.i18n.getMessage('settingsConnectPrompt')}
-          </span>
+          <span className="text-sm text-ink-muted">{t('settingsConnectPrompt')}</span>
           <button
             type="button"
             disabled={pending}
             onClick={handleConnect}
             className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {browser.i18n.getMessage(pending ? 'authConnectingButton' : 'authConnectButton')}
+            {t(pending ? 'authConnectingButton' : 'authConnectButton')}
           </button>
         </div>
       )}
@@ -323,13 +326,47 @@ function AccountSection() {
   );
 }
 
+function LanguageSection({ onChange }: { onChange: () => void }) {
+  const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
+
+  useEffect(() => {
+    getLanguage().then(setLanguageState);
+  }, []);
+
+  async function handleSelect(next: Language) {
+    setLanguageState(next);
+    setLocale(localeFor(next));
+    await setLanguage(next);
+    onChange();
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <SectionHeading messageKey="settingsLanguageLabel" />
+      <SettingsRow label={t('settingsLanguageRow')}>
+        <select
+          aria-label={t('settingsLanguageRow')}
+          value={language}
+          onChange={(event) => void handleSelect(event.target.value as Language)}
+          className="rounded-lg border border-hairline bg-panel px-3 py-2 text-[13px] text-ink"
+        >
+          {languageOptions().map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </SettingsRow>
+    </section>
+  );
+}
+
 function App() {
+  const [, forceRender] = useState(0);
   return (
     <div className="mx-auto max-w-[640px] overflow-hidden rounded-xl border border-hairline bg-panel shadow-[0_1px_3px_rgba(0,0,0,.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,.3)]">
       <div className="border-b border-hairline px-8 py-6">
-        <h1 className="text-lg font-bold text-ink">
-          {browser.i18n.getMessage('settingsPageTitle')}
-        </h1>
+        <h1 className="text-lg font-bold text-ink">{t('settingsPageTitle')}</h1>
       </div>
       <div className="flex flex-col gap-8 p-8">
         <AccountSection />
@@ -337,6 +374,7 @@ function App() {
         <ChannelNotificationsSection />
         <ThemeSection />
         <DensitySection />
+        <LanguageSection onChange={() => forceRender((n) => n + 1)} />
       </div>
     </div>
   );

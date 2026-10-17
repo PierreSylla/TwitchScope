@@ -1,15 +1,18 @@
 import { browser } from 'wxt/browser';
 import {
   DEFAULT_DENSITY,
+  DEFAULT_LANGUAGE,
   DEFAULT_NOTIFICATION_SETTINGS,
   DEFAULT_THEME,
   type Density,
+  type Language,
   type NotificationSettings,
   type Theme,
 } from './types';
 
 export const DENSITY_KEY = 'density';
 export const THEME_KEY = 'theme';
+export const LANGUAGE_KEY = 'language';
 export const NOTIFICATIONS_KEY = 'notifications';
 export const MUTED_CHANNELS_KEY = 'mutedChannels';
 
@@ -29,6 +32,15 @@ export async function getTheme(): Promise<Theme> {
 
 export async function setTheme(theme: Theme): Promise<void> {
   await browser.storage.sync.set({ [THEME_KEY]: theme });
+}
+
+export async function getLanguage(): Promise<Language> {
+  const result = await browser.storage.sync.get(LANGUAGE_KEY);
+  return (result[LANGUAGE_KEY] as Language | undefined) ?? DEFAULT_LANGUAGE;
+}
+
+export async function setLanguage(language: Language): Promise<void> {
+  await browser.storage.sync.set({ [LANGUAGE_KEY]: language });
 }
 
 export async function getNotificationSettings(): Promise<NotificationSettings> {

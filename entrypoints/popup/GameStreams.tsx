@@ -1,8 +1,8 @@
-import { browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { StreamsMessage, StreamsResponse } from '@/lib/streams/types';
 import type { Density } from '@/lib/settings/types';
 import StreamPageList from './StreamPageList';
+import { t, tCount } from '@/lib/i18n/messages';
 
 interface GameStreamsProps {
   gameId: string;
@@ -19,7 +19,7 @@ function GameStreams({ gameId, gameName, density, onBack, onDisconnected }: Game
         <button
           type="button"
           onClick={onBack}
-          aria-label={browser.i18n.getMessage('browseBackButton')}
+          aria-label={t('browseBackButton')}
           className="flex h-6 w-6 flex-none items-center justify-center rounded-lg text-ink-muted hover:bg-tile focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand"
         >
           ←
@@ -29,11 +29,9 @@ function GameStreams({ gameId, gameName, density, onBack, onDisconnected }: Game
       <StreamPageList
         key={gameId}
         density={density}
-        errorMessage={browser.i18n.getMessage('gameStreamsError')}
-        emptyMessage={browser.i18n.getMessage('gameStreamsEmpty')}
-        announce={(count) =>
-          browser.i18n.getMessage('gameStreamsLoadedAnnouncement', [String(count)])
-        }
+        errorMessage={t('gameStreamsError')}
+        emptyMessage={t('gameStreamsEmpty')}
+        announce={(count) => tCount('gameStreamsLoadedAnnouncement', count)}
         fetchPage={(cursor) =>
           sendMessage<StreamsResponse>({
             type: 'streams/getByGame',

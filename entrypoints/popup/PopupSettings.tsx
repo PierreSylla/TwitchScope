@@ -1,7 +1,7 @@
-import { browser } from 'wxt/browser';
 import type { Density, NotificationSettings, Theme } from '@/lib/settings/types';
-import { DENSITY_OPTIONS, THEME_OPTIONS } from '@/lib/settings/labels';
+import { densityOptions, themeOptions } from '@/lib/settings/labels';
 import { SegmentedControl, SettingsRow, ToggleSwitch } from '@/components/SettingsControls';
+import { t } from '@/lib/i18n/messages';
 
 interface PopupSettingsProps {
   density: Density;
@@ -28,39 +28,37 @@ function PopupSettings({
         <button
           type="button"
           onClick={onBack}
-          aria-label={browser.i18n.getMessage('settingsBackButton')}
+          aria-label={t('settingsBackButton')}
           className="flex h-6 w-6 items-center justify-center rounded-lg text-ink-muted hover:bg-tile"
         >
           ←
         </button>
-        <span className="text-[13px] font-semibold text-ink">
-          {browser.i18n.getMessage('settingsPageTitle')}
-        </span>
+        <span className="text-[13px] font-semibold text-ink">{t('settingsPageTitle')}</span>
       </div>
       <div className="flex min-h-[200px] flex-col gap-5 p-3">
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            {browser.i18n.getMessage('settingsNotificationsLabel')}
+            {t('settingsNotificationsLabel')}
           </h2>
-          <SettingsRow label={browser.i18n.getMessage('settingsNotificationsEnable')}>
+          <SettingsRow label={t('settingsNotificationsEnable')}>
             <ToggleSwitch
               checked={notifications.enabled}
-              label={browser.i18n.getMessage('settingsNotificationsEnable')}
+              label={t('settingsNotificationsEnable')}
               onChange={(enabled) => onNotificationsChange({ ...notifications, enabled })}
             />
           </SettingsRow>
         </section>
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            {browser.i18n.getMessage('settingsThemeLabel')}
+            {t('settingsThemeLabel')}
           </h2>
-          <SegmentedControl options={THEME_OPTIONS} value={theme} onChange={onThemeChange} />
+          <SegmentedControl options={themeOptions()} value={theme} onChange={onThemeChange} />
         </section>
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            {browser.i18n.getMessage('settingsDensityLabel')}
+            {t('settingsDensityLabel')}
           </h2>
-          <SegmentedControl options={DENSITY_OPTIONS} value={density} onChange={onDensityChange} />
+          <SegmentedControl options={densityOptions()} value={density} onChange={onDensityChange} />
         </section>
       </div>
     </div>

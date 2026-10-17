@@ -7,6 +7,7 @@ import {
   getDensity,
   getNotificationSettings,
   getTheme,
+  LANGUAGE_KEY,
   NOTIFICATIONS_KEY,
   setDensity,
   setNotificationSettings,
@@ -22,6 +23,9 @@ import {
   type Theme,
 } from '@/lib/settings/types';
 import { applyTheme } from '@/lib/settings/theme';
+import { localeFor } from '@/lib/i18n/apply';
+import { setLocale } from '@/lib/i18n/messages';
+import type { Language } from '@/lib/settings/types';
 import PopupHeader, { type Tab } from './PopupHeader';
 import PopupSettings from './PopupSettings';
 import FollowedView from './FollowedView';
@@ -29,6 +33,7 @@ import PopularView from './PopularView';
 import BrowseView from './BrowseView';
 import SearchView from './SearchView';
 import { StreamSkeleton } from './StreamStates';
+import { t } from '@/lib/i18n/messages';
 
 type Auth = 'loading' | 'connected' | 'disconnected';
 
@@ -43,6 +48,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [tab, setTab] = useState<Tab>('followed');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [, forceRender] = useState(0);
 
   useEffect(() => {
     getDensity().then(setDensityState);
@@ -63,6 +69,10 @@ function App() {
         const next = (changes[THEME_KEY].newValue as Theme | undefined) ?? DEFAULT_THEME;
         setThemeState(next);
         applyTheme(next);
+      }
+      if (changes[LANGUAGE_KEY]) {
+        setLocale(localeFor((changes[LANGUAGE_KEY].newValue as Language | undefined) ?? 'auto'));
+        forceRender((n) => n + 1);
       }
       if (changes[NOTIFICATIONS_KEY]) {
         setNotificationsState({
@@ -143,11 +153,9 @@ function App() {
           <span className="relative block h-12 w-12 rounded-full border-2 border-brand">
             <span className="absolute -bottom-px -right-px block h-3.5 w-3.5 rounded-full bg-brand" />
           </span>
-          <p className="text-sm font-semibold text-ink">
-            {browser.i18n.getMessage('followedDisconnectedTitle')}
-          </p>
+          <p className="text-sm font-semibold text-ink">{t('followedDisconnectedTitle')}</p>
           <p className="max-w-[260px] text-[13px] leading-relaxed text-ink-muted">
-            {browser.i18n.getMessage('followedDisconnectedBody')}
+            {t('followedDisconnectedBody')}
           </p>
           <button
             type="button"
@@ -155,7 +163,7 @@ function App() {
             onClick={handleConnect}
             className="rounded-lg bg-brand px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50"
           >
-            {browser.i18n.getMessage(connecting ? 'authConnectingButton' : 'authConnectButton')}
+            {t(connecting ? 'authConnectingButton' : 'authConnectButton')}
           </button>
         </div>
       )}

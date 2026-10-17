@@ -31,6 +31,8 @@ import {
   getNotificationSettings,
   NOTIFICATIONS_KEY,
 } from '@/lib/settings/storage';
+import { t } from '@/lib/i18n/messages';
+import { applyStoredLanguage } from '@/lib/i18n/apply';
 
 const TOKEN_VALIDATION_ALARM = 'auth-token-validate';
 const POLL_ALARM = 'followed-streams-poll';
@@ -76,7 +78,7 @@ function notifyLive(stream: StreamView) {
   browser.notifications.create(notificationIdFor(stream.login), {
     type: 'basic',
     iconUrl: browser.runtime.getURL('/icon/128.png'),
-    title: browser.i18n.getMessage('notificationLiveTitle', [stream.channel]),
+    title: t('notificationLiveTitle', [stream.channel]),
     message: stream.game ? `${stream.game} — ${stream.title}` : stream.title,
   });
 }
@@ -92,6 +94,7 @@ async function commitFollowed(streams: StreamView[]) {
 }
 
 async function pollFollowedStreams(notify: boolean) {
+  await applyStoredLanguage();
   const res = await respondWithStreams(loadFollowed);
   if (!res.ok) {
     if (res.error === 'not_connected') await setBadge(0);

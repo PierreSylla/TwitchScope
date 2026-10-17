@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { browser } from 'wxt/browser';
 import type { StreamsResponse, StreamView } from '@/lib/streams/types';
 import type { Density } from '@/lib/settings/types';
 import StreamCard from './StreamCard';
 import { StreamEmpty, StreamError, StreamList, StreamSkeleton } from './StreamStates';
+import { t } from '@/lib/i18n/messages';
 
 type State =
   | { kind: 'loading' }
@@ -83,7 +83,7 @@ function StreamPageList({
   return (
     <>
       <p className="sr-only" aria-live="polite">
-        {state.kind === 'loading' && browser.i18n.getMessage('authLoading')}
+        {state.kind === 'loading' && t('authLoading')}
         {state.kind === 'error' && errorMessage}
         {state.kind === 'empty' && emptyMessage}
         {state.kind === 'loaded' && announce(state.streams.length)}
@@ -107,7 +107,7 @@ function StreamPageList({
               disabled={state.loadingMore}
               className="flex-none py-1.5 text-center text-[13px] font-semibold text-brand disabled:opacity-50"
             >
-              {browser.i18n.getMessage(state.loadingMore ? 'authLoading' : 'loadMoreButton')}
+              {t(state.loadingMore ? 'authLoading' : 'loadMoreButton')}
             </button>
           )}
         </StreamList>

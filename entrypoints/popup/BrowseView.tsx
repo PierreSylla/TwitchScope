@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { browser } from 'wxt/browser';
 import { sendMessage } from '@/lib/messaging';
 import type { GamesMessage, GamesResponse, GameView } from '@/lib/games/types';
 import type { Density } from '@/lib/settings/types';
 import GameStreams from './GameStreams';
 import { StreamEmpty, StreamError, StreamSkeleton } from './StreamStates';
+import { t, tCount } from '@/lib/i18n/messages';
 
 type State =
   | { kind: 'loading' }
@@ -83,20 +83,17 @@ function BrowseView({ density, onDisconnected }: BrowseViewProps) {
   return (
     <>
       <p className="sr-only" aria-live="polite">
-        {state.kind === 'loading' && browser.i18n.getMessage('authLoading')}
-        {state.kind === 'error' && browser.i18n.getMessage('browseError')}
-        {state.kind === 'empty' && browser.i18n.getMessage('browseEmpty')}
-        {state.kind === 'loaded' &&
-          browser.i18n.getMessage('browseLoadedAnnouncement', [String(state.games.length)])}
+        {state.kind === 'loading' && t('authLoading')}
+        {state.kind === 'error' && t('browseError')}
+        {state.kind === 'empty' && t('browseEmpty')}
+        {state.kind === 'loaded' && tCount('browseLoadedAnnouncement', state.games.length)}
       </p>
 
       {state.kind === 'loading' && <StreamSkeleton density={density} />}
 
-      {state.kind === 'error' && (
-        <StreamError message={browser.i18n.getMessage('browseError')} onRetry={retry} />
-      )}
+      {state.kind === 'error' && <StreamError message={t('browseError')} onRetry={retry} />}
 
-      {state.kind === 'empty' && <StreamEmpty message={browser.i18n.getMessage('browseEmpty')} />}
+      {state.kind === 'empty' && <StreamEmpty message={t('browseEmpty')} />}
 
       {state.kind === 'loaded' && (
         <div className="grid max-h-[480px] grid-cols-2 gap-3 overflow-y-auto p-3">
@@ -120,7 +117,7 @@ function BrowseView({ density, onDisconnected }: BrowseViewProps) {
               disabled={state.loadingMore}
               className="col-span-2 py-1.5 text-center text-[13px] font-semibold text-brand disabled:opacity-50"
             >
-              {browser.i18n.getMessage(state.loadingMore ? 'authLoading' : 'loadMoreButton')}
+              {t(state.loadingMore ? 'authLoading' : 'loadMoreButton')}
             </button>
           )}
         </div>

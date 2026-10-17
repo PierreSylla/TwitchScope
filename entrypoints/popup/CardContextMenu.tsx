@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { browser } from 'wxt/browser';
 import { CHANNEL_ACTIONS, channelUrl, type ChannelAction } from '@/lib/streams/channelLinks';
 import { getMutedChannels, setChannelMuted } from '@/lib/settings/storage';
+import { t, type MessageKey } from '@/lib/i18n/messages';
 
-const LABEL: Record<ChannelAction, Parameters<typeof browser.i18n.getMessage>[0]> = {
+const LABEL: Record<ChannelAction, MessageKey> = {
   newTab: 'cardMenuNewTab',
   playerOnly: 'cardMenuPlayerOnly',
   multitwitch: 'cardMenuMultitwitch',
@@ -87,7 +87,7 @@ function CardContextMenu({ login, channelId, x, y, onClose }: CardContextMenuPro
     <div
       ref={ref}
       data-card-menu
-      aria-label={browser.i18n.getMessage('cardMenuLabel')}
+      aria-label={t('cardMenuLabel')}
       style={{
         left: position.left,
         top: position.top,
@@ -104,7 +104,7 @@ function CardContextMenu({ login, channelId, x, y, onClose }: CardContextMenuPro
           onClick={onClose}
           className="px-3 py-1.5 text-left text-[13px] text-ink hover:bg-tile focus-visible:bg-tile focus-visible:outline-none"
         >
-          {browser.i18n.getMessage(LABEL[action])}
+          {t(LABEL[action])}
         </a>
       ))}
       {muted !== null && (
@@ -113,7 +113,7 @@ function CardContextMenu({ login, channelId, x, y, onClose }: CardContextMenuPro
           onClick={toggleMuted}
           className="mt-1 border-t border-hairline px-3 py-1.5 text-left text-[13px] text-ink hover:bg-tile focus-visible:bg-tile focus-visible:outline-none"
         >
-          {browser.i18n.getMessage(muted ? 'cardMenuUnmute' : 'cardMenuMute')}
+          {t(muted ? 'cardMenuUnmute' : 'cardMenuMute')}
         </button>
       )}
     </div>

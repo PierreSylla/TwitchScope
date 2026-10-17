@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { browser } from 'wxt/browser';
 import type { Density } from '@/lib/settings/types';
+import { t } from '@/lib/i18n/messages';
 
 const LIST_PADDING: Record<Density, string> = {
   compact: 'gap-1 p-2',
@@ -69,7 +69,7 @@ export function StreamError({ message, onRetry }: { message: string; onRetry: ()
         onClick={onRetry}
         className="rounded-lg border border-hairline px-[18px] py-[9px] text-[13px] font-semibold text-ink"
       >
-        {browser.i18n.getMessage('authRetryButton')}
+        {t('authRetryButton')}
       </button>
     </div>
   );

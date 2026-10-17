@@ -1,17 +1,29 @@
-import { browser } from 'wxt/browser';
-import type { Density, Theme } from './types';
+import { t } from '@/lib/i18n/messages';
+import type { Density, Language, Theme } from './types';
 
-export const DENSITY_OPTIONS: readonly { value: Density; label: string }[] = [
-  { value: 'compact', label: browser.i18n.getMessage('settingsDensityCompact') },
-  { value: 'comfortable', label: browser.i18n.getMessage('settingsDensityComfortable') },
-];
+export function densityOptions(): { value: Density; label: string }[] {
+  return [
+    { value: 'compact', label: t('settingsDensityCompact') },
+    { value: 'comfortable', label: t('settingsDensityComfortable') },
+  ];
+}
 
-export const THEME_OPTIONS: readonly { value: Theme; label: string }[] = [
-  { value: 'auto', label: browser.i18n.getMessage('settingsThemeAuto') },
-  { value: 'light', label: browser.i18n.getMessage('settingsThemeLight') },
-  { value: 'dark', label: browser.i18n.getMessage('settingsThemeDark') },
-];
+export function themeOptions(): { value: Theme; label: string }[] {
+  return [
+    { value: 'auto', label: t('settingsThemeAuto') },
+    { value: 'light', label: t('settingsThemeLight') },
+    { value: 'dark', label: t('settingsThemeDark') },
+  ];
+}
+
+export function languageOptions(): { value: Language; label: string }[] {
+  return [
+    { value: 'auto', label: t('settingsLanguageAuto') },
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'English' },
+  ];
+}
 
 export function intervalLabel(minutes: number): string {
-  return browser.i18n.getMessage('settingsNotificationsEveryMinutes', [String(minutes)]);
+  return t('settingsNotificationsEveryMinutes', [String(minutes)]);
 }
