@@ -50,7 +50,7 @@ import { t } from '@/lib/i18n/messages';
 
 /**
  * Reads a synced setting and keeps following it: the same section is rendered in
- * the popup and on the options page, and a write from either must reach both.
+ * the popup's settings panel, and a write from any context must reach it.
  */
 function useSyncedSetting<T>(key: string, read: () => Promise<T>, initial: T) {
   const [value, setValue] = useState<T>(initial);

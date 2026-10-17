@@ -30,8 +30,8 @@ function App() {
 
   useEffect(() => {
     getDensity().then(setDensityState);
-    // Settings are edited in the popup's own panel and on the options page, and
-    // the popup can stay mounted; this is what keeps both in step.
+    // The popup can stay mounted while settings change elsewhere, so follow
+    // storage rather than reading once.
     function handleStorageChange(
       changes: Record<string, Browser.storage.StorageChange>,
       area: string,

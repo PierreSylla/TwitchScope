@@ -1,4 +1,4 @@
-// Shared by the options page and the popup's inline settings view.
+// Shared by every settings section.
 
 interface SegmentedControlProps<T extends string> {
   options: readonly { value: T; label: string }[];
