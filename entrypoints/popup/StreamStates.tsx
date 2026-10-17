@@ -7,10 +7,30 @@ const LIST_PADDING: Record<Density, string> = {
   comfortable: 'gap-3 p-3',
 };
 
-export function StreamList({ density, children }: { density: Density; children: ReactNode }) {
+export function StreamList({
+  density,
+  header,
+  children,
+}: {
+  density: Density;
+  header?: ReactNode;
+  children: ReactNode;
+}) {
+  if (!header) {
+    return (
+      <div className={`flex max-h-[480px] flex-col overflow-y-auto ${LIST_PADDING[density]}`}>
+        {children}
+      </div>
+    );
+  }
+  // The frame owns the cap so the pinned header eats into the list rather than
+  // adding to the popup's height; min-h-0 is what lets the list actually shrink.
   return (
-    <div className={`flex max-h-[480px] flex-col overflow-y-auto ${LIST_PADDING[density]}`}>
-      {children}
+    <div className="flex max-h-[480px] flex-col">
+      {header}
+      <div className={`flex min-h-0 flex-1 flex-col overflow-y-auto ${LIST_PADDING[density]}`}>
+        {children}
+      </div>
     </div>
   );
 }

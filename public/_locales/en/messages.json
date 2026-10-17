@@ -286,5 +286,33 @@
         "example": "12"
       }
     }
+  },
+  "sortLabel": {
+    "message": "Sort by",
+    "description": "Accessible label of the sort control on the followed list."
+  },
+  "sortViewers": {
+    "message": "Viewers",
+    "description": "Sort option: by viewer count, highest first."
+  },
+  "sortName": {
+    "message": "Name",
+    "description": "Sort option: by channel name, A to Z."
+  },
+  "sortGame": {
+    "message": "Game",
+    "description": "Sort option: by game name, A to Z."
+  },
+  "sortDuration": {
+    "message": "Duration",
+    "description": "Sort option: longest-running stream first."
+  },
+  "filterGameLabel": {
+    "message": "Filter by game",
+    "description": "Accessible label of the game filter on the followed list."
+  },
+  "filterAllGames": {
+    "message": "All games",
+    "description": "Game filter option that keeps every game."
   }
 }
