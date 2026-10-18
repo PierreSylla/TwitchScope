@@ -15,7 +15,7 @@ export default defineConfig({
     host_permissions: ['https://api.twitch.tv/*', 'https://id.twitch.tv/*'],
     browser_specific_settings: {
       gecko: {
-        id: 'twitchscope@example.invalid',
+        id: 'twitchscope@psylla.fr',
         strict_min_version: '121.0',
         data_collection_permissions: {
           required: ['none'],
