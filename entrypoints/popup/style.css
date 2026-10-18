@@ -1,5 +1,8 @@
-@import 'tailwindcss';
+@import 'tailwindcss' source(none);
 @import '../../assets/theme.css';
+
+@source '../../entrypoints';
+@source '../../components';
 
 body {
   background: var(--color-panel);
