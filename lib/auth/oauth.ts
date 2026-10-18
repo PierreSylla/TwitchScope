@@ -16,7 +16,7 @@ interface ValidateResult {
   expiresIn: number;
 }
 
-// Logs the failure reason only (never the token) — otherwise auth failures are silent.
+// Logs the failure reason only (never the token) otherwise auth failures are silent.
 function warnAuthError(step: string, code: string): void {
   console.warn(`[auth] ${step} failed: ${code}`);
 }

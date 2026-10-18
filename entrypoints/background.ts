@@ -79,7 +79,7 @@ function notifyLive(stream: StreamView) {
     type: 'basic',
     iconUrl: browser.runtime.getURL('/icon/128.png'),
     title: t('notificationLiveTitle', [stream.channel]),
-    message: stream.game ? `${stream.game} — ${stream.title}` : stream.title,
+    message: stream.game ? `${stream.game} - ${stream.title}` : stream.title,
   });
 }
 

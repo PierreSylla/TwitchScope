@@ -29,3 +29,14 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
+scripts/browse-e2e.mjs
+scripts/cardmenu-e2e.mjs
+scripts/i18n-e2e.mjs
+scripts/layout-e2e.mjs
+scripts/mute-e2e.mjs
+scripts/notifications-e2e.mjs
+scripts/popup-e2e.mjs
+scripts/refresh-e2e.mjs
+scripts/search-e2e.mjs
+scripts/sort-e2e.mjs
+scripts/theme-e2e.mjs

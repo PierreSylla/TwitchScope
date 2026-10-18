@@ -1,8 +1,8 @@
 {
   "name": "twitchscope",
-  "description": "Track your live followed Twitch channels — a modern replacement for Twitch Now.",
+  "description": "Track your live followed Twitch channels.",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",

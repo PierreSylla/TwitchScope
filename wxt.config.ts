@@ -1,10 +1,7 @@
 import { defineConfig } from 'wxt';
 import tailwindcss from '@tailwindcss/vite';
 
-// See https://wxt.dev/api/config.html
 export default defineConfig({
-  // No MV2 fallback on Firefox (WXT's default). Firefox 121+ runs the MV3
-  // background as an event page (background.scripts), not a service worker.
   manifestVersion: 3,
   modules: ['@wxt-dev/module-react'],
   vite: () => ({
@@ -18,9 +15,11 @@ export default defineConfig({
     host_permissions: ['https://api.twitch.tv/*', 'https://id.twitch.tv/*'],
     browser_specific_settings: {
       gecko: {
-        // TODO: replace with the real ID once the extension is registered on AMO.
         id: 'twitchscope@example.invalid',
         strict_min_version: '121.0',
+        data_collection_permissions: {
+          required: ['none'],
+        },
       },
     },
   },
