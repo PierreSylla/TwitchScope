@@ -2,7 +2,7 @@
   "name": "twitchscope",
   "description": "Track your live followed Twitch channels.",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "type": "module",
   "scripts": {

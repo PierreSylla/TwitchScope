@@ -222,20 +222,23 @@ async function handleMessage(message: AppMessage): Promise<AppResponse> {
   }
 }
 
-function onStart() {
+async function onStart() {
   browser.alarms.create(TOKEN_VALIDATION_ALARM, {
     periodInMinutes: TOKEN_VALIDATION_INTERVAL_MINUTES,
   });
-  void revalidateSession();
-  void schedulePolling();
   void browser.action.setBadgeBackgroundColor({ color: BADGE_COLOR });
+  await schedulePolling();
+  await revalidateSession();
+  // Seed the badge and the baseline from the stored token, so the next poll
+  // can already tell which channels went live while the browser was closed.
+  await pollFollowedStreams(false);
 }
 
 export default defineBackground({
   type: 'module',
   main() {
-    browser.runtime.onInstalled.addListener(onStart);
-    browser.runtime.onStartup.addListener(onStart);
+    browser.runtime.onInstalled.addListener(() => void onStart());
+    browser.runtime.onStartup.addListener(() => void onStart());
 
     browser.alarms.onAlarm.addListener((alarm) => {
       if (alarm.name === TOKEN_VALIDATION_ALARM) void revalidateSession();

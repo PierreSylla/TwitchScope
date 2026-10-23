@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { buildAuthorizeUrl, parseAuthRedirect } from './oauth';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildAuthorizeUrl, parseAuthRedirect, revalidateSession } from './oauth';
 
 describe('buildAuthorizeUrl', () => {
   it('includes the implicit grant params', () => {
@@ -36,5 +36,41 @@ describe('parseAuthRedirect', () => {
     const redirect = 'https://example.com/redirect#state=xyz';
 
     expect(() => parseAuthRedirect(redirect, 'xyz')).toThrow('missing_access_token');
+  });
+});
+
+const storage = vi.hoisted(() => ({
+  getSession: vi.fn(),
+  setSession: vi.fn(),
+  clearSession: vi.fn(),
+}));
+vi.mock('./storage', () => storage);
+
+describe('revalidateSession', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    storage.getSession.mockResolvedValue({
+      accessToken: 'tok',
+      login: 'tester',
+      userId: 'me',
+      expiresAt: Date.now() + 3600000,
+    });
+    storage.clearSession.mockClear();
+  });
+
+  it('clears the session when Twitch rejects the token', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 401 })));
+
+    await revalidateSession();
+
+    expect(storage.clearSession).toHaveBeenCalled();
+  });
+
+  it('keeps the session when Twitch is unreachable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+
+    await revalidateSession();
+
+    expect(storage.clearSession).not.toHaveBeenCalled();
   });
 });

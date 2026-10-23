@@ -10,6 +10,8 @@ import {
 import { clearSession, getSession, setSession } from './storage';
 import type { AuthResponse, AuthStatus } from './types';
 
+const INVALID_TOKEN = 'invalid_token';
+
 interface ValidateResult {
   login: string;
   userId: string;
@@ -51,7 +53,7 @@ async function validateToken(accessToken: string): Promise<ValidateResult> {
   const response = await fetch(OAUTH_VALIDATE_URL, {
     headers: { Authorization: `OAuth ${accessToken}` },
   });
-  if (!response.ok) throw new Error('invalid_token');
+  if (!response.ok) throw new Error(INVALID_TOKEN);
 
   const body = (await response.json()) as {
     login: string;
@@ -138,8 +140,12 @@ export async function revalidateSession(): Promise<void> {
   if (!session) return;
   try {
     await validateToken(session.accessToken);
-  } catch {
-    warnAuthError('revalidateSession', 'validation_failed');
-    await clearSession();
+  } catch (err) {
+    if (err instanceof Error && err.message === INVALID_TOKEN) {
+      warnAuthError('revalidateSession', INVALID_TOKEN);
+      await clearSession();
+      return;
+    }
+    warnAuthError('revalidateSession', 'unreachable');
   }
 }

@@ -74,8 +74,10 @@ output.
 Nothing is sent anywhere except the Twitch API the user signs in to
 (`api.twitch.tv` and `id.twitch.tv`). There is no backend belonging to the
 developer, no analytics and no telemetry. The OAuth token is held in
-`storage.session` and never logged; preferences are held in `storage.sync`,
-which is the user's own browser account. This is why the manifest declares
+`storage.local` and never logged, so a browser restart does not force the
+user back through Twitch's authorize page; "Disconnect" revokes it at Twitch
+and deletes it. Preferences are held in `storage.sync`, which is the user's
+own browser account. This is why the manifest declares
 `data_collection_permissions: { required: ["none"] }`.
 
 ## Development
