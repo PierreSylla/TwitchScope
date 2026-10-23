@@ -46,7 +46,7 @@ echo 'WXT_TWITCH_CLIENT_ID=3xbogds6hzlvrbgxflsa9n82hiv2ic' > .env
 ```sh
 npm ci                  # install exactly the versions in package-lock.json
 npm run build:firefox   # outputs .output/firefox-mv3/
-npm run zip:firefox     # outputs .output/twitchscope-1.0.0-firefox.zip
+npm run zip:firefox     # outputs .output/twitchscope-1.0.1-firefox.zip
 ```
 
 `.output/firefox-mv3/` is the unpacked extension and should match the contents
